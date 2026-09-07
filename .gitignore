@@ -11,3 +11,4 @@ __pycache__/
 # Word / Excel temporarios
 ~$*
 *.tmp
+.pytest_cache/

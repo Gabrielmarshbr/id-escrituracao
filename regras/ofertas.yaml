@@ -1,0 +1,8 @@
+# Uma entrada por OFERTA, a partir do suplemento assinado.
+#
+# - id: OF1
+#   classe_id: F1/A
+#   publica: true                        # false = privada: para sempre para conferencia
+#   qualificacao_exigida: profissional   # opcional; so se for alem do que a classe exige
+#   valor_minimo: "1000.00"              # opcional
+#   vigencia_ate: 2026-12-31             # opcional

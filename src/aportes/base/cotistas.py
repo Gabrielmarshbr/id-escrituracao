@@ -1,15 +1,41 @@
-"""dados/cotistas.json — a base de cotistas. NUNCA vai para o git.
+"""dados/cotistas.<usuario>.json — a base de cotistas. NUNCA vai para o git.
 
-Tres fontes alimentam este arquivo e vao discordar. A data da procedencia
+Tres fontes alimentam esta base e vao discordar. A data da procedencia
 resolve, bloco a bloco: qualificacao e cadastro tem historias separadas.
+
+Um arquivo por pessoa, pelo mesmo motivo das boletas: a equipe trabalha junta
+e ninguem pode sobrescrever o arquivo de ninguem. A fusao usa a mesma funcao
+`mesclar` que resolve divergencia entre fontes — vence o bloco mais novo, nao
+quem escreveu.
 """
 
 import json
 from datetime import date
 from pathlib import Path
 
+from aportes.base.nomes import arquivo_do_usuario
 from aportes.dominio import Cotista, Procedencia, TipoPessoa
 from aportes.qualificacao import Categoria
+
+_PREFIXO = "cotistas"
+
+
+def carregar_da_equipe(pasta: Path) -> dict[str, Cotista]:
+    """Funde o que toda a equipe cadastrou, numa base so.
+
+    Independe da ordem dos arquivos: quem decide e a data da procedencia.
+    """
+    base: dict[str, Cotista] = {}
+    for caminho in sorted(pasta.glob(f"{_PREFIXO}.*.json")):
+        for documento, cotista in carregar_cotistas(caminho).items():
+            base[documento] = mesclar(base.get(documento), cotista)
+    return base
+
+
+def salvar_do_usuario(pasta: Path, usuario: str,
+                      cotistas: dict[str, Cotista]) -> None:
+    """Grava no arquivo desta pessoa. Nunca toca no de outra."""
+    salvar_cotistas(arquivo_do_usuario(pasta, _PREFIXO, usuario), cotistas)
 
 
 def carregar_cotistas(caminho: Path) -> dict[str, Cotista]:

@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from aportes.base.boletas import carregar_vistas, chave, registrar
+from aportes.base.boletas import carregar_vistas_da_equipe, chave, registrar
 from aportes.dominio import Boleta
 
 
@@ -10,23 +10,22 @@ def _boleta(id="B1", valor="10000.00"):
                   oferta_id="OF1", valor=Decimal(valor), data=date(2026, 9, 7))
 
 
-def test_arquivo_inexistente_nao_tem_nada_visto(tmp_path):
-    assert carregar_vistas(tmp_path / "b.json") == set()
+def test_pasta_sem_arquivo_nao_tem_nada_visto(tmp_path):
+    assert carregar_vistas_da_equipe(tmp_path) == set()
 
 
 def test_boleta_registrada_fica_vista(tmp_path):
-    caminho = tmp_path / "b.json"
     b = _boleta()
-    registrar(caminho, b, ("boletim_subscricao",))
-    assert chave(b) in carregar_vistas(caminho)
+    registrar(tmp_path, "gabriel", b, ("boletim_subscricao",))
+    assert chave(b) in carregar_vistas_da_equipe(tmp_path)
 
 
 def test_registrar_duas_vezes_e_inofensivo(tmp_path):
-    caminho = tmp_path / "b.json"
+    """Colar o mesmo print de novo nao pode duplicar nada."""
     b = _boleta()
-    registrar(caminho, b, ("boletim_subscricao",))
-    registrar(caminho, b, ("boletim_subscricao",))
-    assert len(carregar_vistas(caminho)) == 1
+    registrar(tmp_path, "gabriel", b, ("boletim_subscricao",))
+    registrar(tmp_path, "gabriel", b, ("boletim_subscricao",))
+    assert len(carregar_vistas_da_equipe(tmp_path)) == 1
 
 
 def test_chave_usa_o_id_quando_existe():

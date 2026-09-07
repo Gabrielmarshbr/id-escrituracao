@@ -105,10 +105,19 @@ class Base:
     cotistas: dict[str, Cotista]
     classes: dict[str, Classe]
     ofertas: dict[str, Oferta]
-    posicoes: frozenset[tuple[str, str]]
 
-    def tem_posicao(self, documento: str, classe_id: str) -> bool:
-        return (documento, classe_id) in self.posicoes
+    #: (documento do cotista, CNPJ do fundo, id da classe), do Saldo de
+    #: Aplicacoes. O CNPJ do fundo vem junto de proposito: a pergunta do
+    #: Termo de Adesao e por fundo, e nao pode depender de a classe ja
+    #: estar cadastrada em regras/fundos.yaml.
+    posicoes: frozenset[tuple[str, str, str]]
+
+    def tem_posicao_no_fundo(self, documento: str, fundo_cnpj: str) -> bool:
+        """O cotista ja esta em alguma classe deste fundo?"""
+        return any(
+            doc == documento and cnpj == fundo_cnpj
+            for doc, cnpj, _ in self.posicoes
+        )
 
 
 @dataclass(frozen=True)

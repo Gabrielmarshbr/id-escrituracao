@@ -14,7 +14,7 @@ lançadas pelos gestores no Portal ID ao longo do dia. Cada uma é analisada e
 aprovada manualmente, e a análise segue sempre o mesmo checklist:
 
 1. O cotista pode aportar naquele fundo/classe? (elegibilidade)
-2. É o primeiro aporte dele naquela classe? (define se sai Termo de Adesão)
+2. É o primeiro aporte dele naquele fundo? (define se sai Termo de Adesão)
 3. O condomínio do fundo é aberto ou fechado? (define se sai Boletim de Subscrição)
 4. A categoria CVM do cotista atende ao exigido pela classe e pela oferta?
 5. Aprovar ou reprovar no Portal ID, e gerar os documentos.
@@ -174,7 +174,7 @@ sistema**. O programa lê a mais recente quando precisa; não copia posição pa
 lugar nenhum. Menos estado, menos risco de trabalhar com posição velha sem
 perceber.
 
-Daí saem duas respostas: "é primeiro aporte nesta classe?" e a % de
+Daí saem duas respostas: "é primeiro aporte neste fundo?" e a % de
 participação no PL para a Lista de Cotistas.
 
 ### `dados/boletas.json`
@@ -228,11 +228,17 @@ Aberto → **não existe Boletim de Subscrição**, e ela diz isso em vez de ger
 documento que não deveria existir. Isso não interrompe a boleta: o Termo de
 Adesão ainda pode sair, pela regra 3.
 
-**3. É o primeiro aporte deste cotista nesta classe?**
-A chave é **cotista + classe**, não cotista + fundo: quem já está no fundo mas
-entra numa classe nova assina Termo de Adesão de novo. Consulta o Saldo de
-Aplicações. Não aparece → primeiro aporte → o TA entra junto.
-**O TA independe do condomínio** — sai sempre no primeiro aporte na classe.
+**3. É o primeiro aporte deste cotista neste fundo?**
+A chave é **cotista + fundo**, não cotista + classe: é um Termo de Adesão por
+cotista por fundo, independente de em quantas classes ele entra. Quem já aderiu
+ao fundo pela Classe A não assina de novo ao entrar na Classe B.
+
+Consulta o Saldo de Aplicações, que separa a posição por classe. Cada posição
+carrega o **CNPJ do fundo** junto do id da classe, de propósito: se a pergunta
+dependesse de traduzir classe→fundo pelo `fundos.yaml`, uma classe ainda não
+cadastrada ficaria invisível e sairia um Termo de Adesão indevido.
+
+**O TA independe do condomínio** — sai sempre no primeiro aporte no fundo.
 
 **4. A qualificação bate?**
 Categoria do cotista contra a exigida pela classe e pela oferta, valendo **a
@@ -285,7 +291,8 @@ traz o valor total em R$.
 
 ### Termo de Adesão e Ciência de Risco
 
-Sai no primeiro aporte do cotista **na classe**, independente do condomínio.
+Sai no primeiro aporte do cotista **no fundo**, independente do condomínio.
+Um por cotista por fundo, em quantas classes ele entrar.
 
 ### Como o preenchimento funciona
 
@@ -368,7 +375,7 @@ conferir por amostragem e o segundo para decidir.
 **O motor de regras é a parte com teste de verdade.** Não lê arquivo nem
 escreve nada: recebe cotista, classe, oferta e valor, devolve veredito. Cada
 linha do checklist vira caso de teste — Qualificado em classe que exige
-Profissional, primeiro aporte na classe B de quem já está na A, oferta privada,
+Profissional, aporte na classe B de quem já está na A do mesmo fundo, oferta privada,
 condomínio desconhecido. Teste escrito antes do código.
 
 **Os leitores são testados contra arquivos reais, anonimizados.** Uma
@@ -449,9 +456,9 @@ Deliberadamente não construído nesta rodada:
 
 Coisas a verificar ao começar, não decididas aqui:
 
-1. **O Saldo de Aplicações do Britech separa a posição por classe?** A regra 3
-   (primeiro aporte na classe) depende disso. Se o relatório só consolidar por
-   fundo, é preciso achar outro relatório ou outra chave.
+1. ~~**O Saldo de Aplicações do Britech separa a posição por classe?**~~
+   **Respondido em 07/09/2026: separa.** O leitor deve produzir, por linha,
+   o documento do cotista, o CNPJ do fundo e o id da classe.
 2. **A exportação de boletas do Portal ID traz número ou código da boleta?** Se
    traz, é a chave de deduplicação. Se não, a chave composta (cotista + fundo +
    valor + data) é menos sólida: duas boletas idênticas no mesmo dia colapsam

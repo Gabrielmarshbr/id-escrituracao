@@ -37,13 +37,15 @@ def test_boleta_recusa_valor_float():
                oferta_id="OF1", valor=1000.0, data=date(2026, 9, 7))
 
 
-def test_base_encontra_posicao_do_cotista_na_classe():
+def test_base_encontra_posicao_do_cotista_no_fundo():
+    """A posicao carrega o CNPJ do fundo: o Termo de Adesao e por fundo."""
     base = Base(
         cotistas={}, classes={}, ofertas={},
-        posicoes=frozenset({("11111111111", "F1/A")}),
+        posicoes=frozenset({("11111111111", "11111111000111", "F1/A")}),
     )
-    assert base.tem_posicao("11111111111", "F1/A") is True
-    assert base.tem_posicao("11111111111", "F1/B") is False
+    assert base.tem_posicao_no_fundo("11111111111", "11111111000111") is True
+    assert base.tem_posicao_no_fundo("11111111111", "99999999000199") is False
+    assert base.tem_posicao_no_fundo("22222222222", "11111111000111") is False
 
 
 def test_veredito_carrega_motivo():

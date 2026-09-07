@@ -17,6 +17,7 @@ PROC = Procedencia(fonte="regulamento", em=date(2026, 1, 15))
 PROC_FICHA = Procedencia(fonte="ficha_pdf", em=date(2026, 3, 12))
 
 DOC_COTISTA = "11111111111"
+CNPJ_FUNDO = "11111111000111"
 
 
 def faz_cotista(documento=DOC_COTISTA, categoria=Categoria.PROFISSIONAL,
@@ -32,7 +33,7 @@ def faz_cotista(documento=DOC_COTISTA, categoria=Categoria.PROFISSIONAL,
 def faz_classe(id="F1/A", condominio=Condominio.FECHADO,
                exigida=Categoria.QUALIFICADO):
     return Classe(
-        id=id, fundo_nome="Fundo Exemplo FIDC", fundo_cnpj="11111111000111",
+        id=id, fundo_nome="Fundo Exemplo FIDC", fundo_cnpj=CNPJ_FUNDO,
         nome="Classe A", condominio=condominio,
         qualificacao_exigida=exigida, procedencia=PROC,
     )

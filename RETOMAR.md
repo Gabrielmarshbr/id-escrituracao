@@ -56,8 +56,9 @@ Todos vêm da máquina da empresa, **anonimizados**:
 
 E duas coisas a verificar na máquina da empresa:
 
-- [ ] O Saldo de Aplicações separa a posição **por classe**? A regra do Termo
-      de Adesão depende disso (é por classe, não por fundo).
+- [x] O Saldo de Aplicações separa a posição **por classe**? **Sim** (confirmado
+      em 07/09/2026). O leitor deve produzir, por linha: documento do cotista,
+      CNPJ do fundo e id da classe.
 - [ ] A exportação de boletas traz **número/código da boleta**? É a chave de
       deduplicação.
 

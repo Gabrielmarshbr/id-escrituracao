@@ -81,13 +81,17 @@ def avaliar(boleta: Boleta, base: Base) -> Veredito:
     if classe.condominio is Condominio.FECHADO:
         documentos.append(BOLETIM)
 
-    primeiro_aporte = not base.tem_posicao(boleta.documento_cotista, classe.id)
+    # O Termo de Adesao e um por cotista por FUNDO, nao por classe: quem ja
+    # aderiu ao fundo por outra classe nao assina de novo.
+    primeiro_aporte = not base.tem_posicao_no_fundo(
+        boleta.documento_cotista, classe.fundo_cnpj
+    )
     if primeiro_aporte:
         documentos.append(TERMO_ADESAO)
 
     motivo = (
         f"classe {classe.id}, condominio {classe.condominio.value}, "
-        f"{'primeiro aporte na classe' if primeiro_aporte else 'aporte subsequente'}"
+        f"{'primeiro aporte no fundo' if primeiro_aporte else 'aporte subsequente'}"
     )
 
     return Veredito(

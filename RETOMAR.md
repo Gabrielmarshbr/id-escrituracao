@@ -9,6 +9,7 @@ aprovada em seções e commitada. O projeto saiu do papel.
 
 ## Leia nesta ordem
 
+0. `INSTALAR.md` — como levar e rodar o projeto na máquina da empresa.
 1. `docs/superpowers/specs/2026-09-07-aportes-design.md` — **a spec.** É a
    fonte de verdade do desenho. 13 seções.
 2. `contexto/01-esteira-subscricao.md` e `contexto/02-escrituracao-4-microareas.md`

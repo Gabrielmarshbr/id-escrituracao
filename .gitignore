@@ -1,0 +1,13 @@
+# Dados pessoais de cotistas e documentos gerados NUNCA vao para o repositorio.
+# Ver docs/superpowers/specs/ - secao "Privacidade e LGPD".
+dados/
+saida/
+
+# Ambiente Python
+.venv/
+__pycache__/
+*.pyc
+
+# Word / Excel temporarios
+~$*
+*.tmp

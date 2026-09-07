@@ -31,6 +31,19 @@ def avaliar(boleta: Boleta, base: Base) -> Veredito:
             ),
         )
 
+    if not base.conhece_saldo_do_fundo(classe.fundo_cnpj):
+        return Veredito(
+            situacao=Situacao.FALTOU_DADO,
+            motivo=(
+                f"nao sei a posicao do fundo {classe.fundo_nome}: nenhum Saldo "
+                "de Aplicacoes carregado cobre esse fundo"
+            ),
+            pendencias=(
+                f"exporte o Saldo de Aplicacoes do fundo {classe.fundo_nome} no "
+                "Britech e coloque em dados/saldos/",
+            ),
+        )
+
     oferta = base.ofertas.get(boleta.oferta_id) if boleta.oferta_id else None
     if oferta is None:
         return Veredito(

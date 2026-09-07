@@ -112,6 +112,13 @@ class Base:
     #: estar cadastrada em regras/fundos.yaml.
     posicoes: frozenset[tuple[str, str, str]]
 
+    #: CNPJs dos fundos cobertos por algum Saldo de Aplicacoes carregado.
+    #: Ausencia de posicao so significa "primeiro aporte" para fundos daqui.
+    fundos_com_saldo: frozenset[str] = frozenset()
+
+    def conhece_saldo_do_fundo(self, fundo_cnpj: str) -> bool:
+        return fundo_cnpj in self.fundos_com_saldo
+
     def tem_posicao_no_fundo(self, documento: str, fundo_cnpj: str) -> bool:
         """O cotista ja esta em alguma classe deste fundo?"""
         return any(

@@ -59,4 +59,5 @@ def base_completa():
         classes={"F1/A": faz_classe()},
         ofertas={"OF1": faz_oferta()},
         posicoes=frozenset(),
+        fundos_com_saldo=frozenset({CNPJ_FUNDO}),
     )

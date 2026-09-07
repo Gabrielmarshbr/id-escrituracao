@@ -5,6 +5,24 @@ from aportes.regras import BOLETIM, TERMO_ADESAO, avaliar
 from tests.conftest import CNPJ_FUNDO, DOC_COTISTA, faz_boleta, faz_classe
 
 
+def test_sem_saldo_do_fundo_nao_presume_primeiro_aporte(base_completa):
+    """A falha mais cara possível: sem saldo carregado, tudo parece 1o aporte.
+
+    Ausencia de posicao so significa 'primeiro aporte' se houver um Saldo de
+    Aplicacoes daquele fundo. Sem isso, a pergunta nao tem resposta.
+    """
+    base = replace(base_completa, fundos_com_saldo=frozenset())
+    v = avaliar(faz_boleta(), base)
+    assert v.situacao is Situacao.FALTOU_DADO
+    assert TERMO_ADESAO not in v.documentos
+    assert any("saldo" in p.lower() for p in v.pendencias)
+
+
+def test_saldo_de_outro_fundo_nao_serve(base_completa):
+    base = replace(base_completa, fundos_com_saldo=frozenset({"99999999000199"}))
+    assert avaliar(faz_boleta(), base).situacao is Situacao.FALTOU_DADO
+
+
 def test_sem_posicao_no_fundo_gera_termo_de_adesao(base_completa):
     v = avaliar(faz_boleta(), base_completa)
     assert TERMO_ADESAO in v.documentos

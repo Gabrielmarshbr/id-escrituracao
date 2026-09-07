@@ -42,6 +42,7 @@ def test_base_encontra_posicao_do_cotista_no_fundo():
     base = Base(
         cotistas={}, classes={}, ofertas={},
         posicoes=frozenset({("11111111111", "11111111000111", "F1/A")}),
+        fundos_com_saldo=frozenset({"11111111000111"}),
     )
     assert base.tem_posicao_no_fundo("11111111111", "11111111000111") is True
     assert base.tem_posicao_no_fundo("11111111111", "99999999000199") is False

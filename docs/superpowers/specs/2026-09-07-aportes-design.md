@@ -184,12 +184,16 @@ seguinte mostrar só o que é novo.
 
 ---
 
-## 5. As três portas de entrada da base
+## 5. As portas de entrada da base
 
-Custos escalonados, e o desenho usa as três:
+A base tem dois lados, alimentados por caminhos diferentes: **quem são os
+cotistas** e **quais são as regras**.
+
+### Os cotistas: três portas, de custo escalonado
 
 1. **Saldo de Aplicações (Britech, Excel)** — o esqueleto: quem está no fundo,
-   CPF/CNPJ, posição. Grátis, em lote, reexportável a qualquer momento.
+   CPF/CNPJ, posição, separada por classe e com o CNPJ do fundo. Grátis, em
+   lote, reexportável a qualquer momento.
 2. **Excel de cotistas (Portal ID)** — os dados cadastrais de **~40%** dos
    cotistas, de uma vez.
 3. **Ficha cadastral em PDF (Portal ID)** — o resto, sob demanda, à medida que
@@ -208,6 +212,42 @@ custa nada.
 os dados cadastrais de todos os cotistas de um fundo de uma vez. Com a base
 engordando pelo uso diário dos aportes, ela vai deixando de ser trabalho e
 virando consulta.
+
+### As regras: a quarta porta, com você no meio
+
+O `fundos.yaml` e o `ofertas.yaml` também precisam ser preenchidos, e hoje isso
+custa caro: a primeira boleta de um fundo novo manda o Gabriel ao Slack ler
+cláusula jurídica para descobrir condomínio e qualificação exigida; cada oferta
+nova exige ler o suplemento assinado.
+
+A quarta porta usa **o mesmo arranjo do print da fila de boletas**: o Claude
+Code lê o documento e **propõe**; o Gabriel **confirma**; o código determinístico
+**decide**. O passo falível fica isolado e conferido antes de virar consequência.
+
+**Regulamento → `fundos.yaml`.** O PDF do regulamento (baixado do Slack) é lido,
+e sai uma entrada preenchida: condomínio, qualificação exigida por classe, com
+`fonte` e `lido_em`. O Gabriel confere contra o documento e corrige o que
+estiver errado. **Uma vez por fundo, na vida.**
+
+**Suplemento → `ofertas.yaml`.** Mesma coisa: pública ou privada, qualificação,
+valor mínimo, vigência. **Uma vez por oferta.**
+
+Três limites que fazem parte do desenho, não são ressalvas contra ele:
+
+1. **Nada é gravado sem confirmação.** Uma proposta não conferida não vira
+   regra. Oferta cadastrada errada contamina todas as boletas dela — é
+   exatamente onde a leitura automática silenciosa seria mais cara.
+2. **A leitura não decide, propõe.** O regulamento é documento jurídico com
+   redação que varia por escritório, às vezes por remissão a outro artigo. É a
+   espécie de texto onde extração erra em silêncio. A conferência humana é o
+   que torna a porta segura, e por isso ela não é opcional.
+3. **A proposta cita onde leu.** Junto de cada campo vem o trecho do documento
+   que o sustenta, para a conferência ser olhar duas linhas em vez de reler o
+   PDF inteiro.
+
+O que essa porta ataca é o ponto que faz **fundo novo doer**. Sem ela, cada
+fundo inédito custa uma ida ao Slack e uma leitura jurídica; com ela, custa uma
+conferência.
 
 ---
 
@@ -356,6 +396,11 @@ ignoradas em silêncio. Colar o mesmo print de novo é inofensivo.
 **Quando resolve uma pendência.** O fato é registrado uma vez — o condomínio do
 fundo, a ficha do cotista — e nunca mais é perguntado.
 
+Quando a pendência é um **fundo ou uma oferta que ainda não existem na base**, o
+caminho é a quarta porta (seção 5): o Gabriel joga o regulamento ou o suplemento
+na pasta, recebe a entrada do YAML já preenchida com os trechos que a sustentam,
+confere e confirma. Daí em diante aquele fundo passa direto.
+
 **Caminho alternativo.** A fila de boletas do Portal ID também é exportável em
 planilha. Não é o caminho principal (as boletas chegam ao longo do dia, e
 exportar a planilha inteira a cada boleta nova é desperdício), mas serve para
@@ -435,11 +480,20 @@ para permitir instalação offline.
 Deliberadamente não construído nesta rodada:
 
 - **Integração com Slack.** App do Slack exige aprovação do workspace
-  (dependência da TI). E o ganho é pequeno: o regulamento de cada fundo é lido
-  **uma vez na vida**. Se a TI liberar depois, entra como conveniência para
-  buscar e baixar o documento — nunca como decisor, porque extrair "condomínio
-  aberto ou fechado" de cláusula jurídica é a espécie de leitura que erra em
-  silêncio.
+  (dependência da TI). E o ganho encolheu: com a quarta porta (seção 5), o
+  trabalho caro — ler a cláusula e traduzir em regra — já está resolvido. O que
+  sobraria para o Slack é baixar o arquivo, que o Gabriel faz em segundos. Se a
+  TI liberar depois, entra como conveniência para buscar o documento; nunca
+  como decisor.
+- **Automação do Outlook** para os extratos de posição de fechamento de mês.
+  Mesma tecnologia COM já validada com o Word, e ataca outra dor real — mas é
+  outra microárea do trabalho, e ganha spec própria.
+- **Automação de tela no Britech e no Portal ID.** Cadastrar cotista novo e
+  liberar visualização é candidato razoável no futuro. **Aprovar boleta no
+  Portal ID não é**: o portal é instável (o próprio Gabriel o descreve assim),
+  automação de tela quebra contra sistema que muda, e aprovar é o ato de
+  responsabilidade da área. O ganho seria um clique; o risco, uma aprovação que
+  ninguém decidiu.
 - **Login automatizado no Portal ID.** Não há acesso.
 - **Leitura automática do suplemento de oferta em PDF.** Formato livre, varia
   por gestor — a espécie ruim de extração.

@@ -2286,6 +2286,15 @@ com o que a casa escreve.
 **Task 18 — o comando do bloco.** Junta tudo: transcrição conferida → motor →
 documentos → PDF → relatório em três montes. Depende das tasks acima.
 
+**Task 20 — registro assistido de fundo e oferta (quarta porta, spec §5).**
+O Claude Code lê o regulamento ou o suplemento em PDF e propõe a entrada de
+`regras/fundos.yaml` ou `regras/ofertas.yaml`, citando o trecho que sustenta
+cada campo; o Gabriel confere e confirma antes de gravar. O código a escrever é
+pequeno — `scripts/conferir_regras.py`, que carrega os dois YAML com os leitores
+da Task 8 e relata o que está registrado e o que está malformado, para rodar
+depois de cada entrada nova. O valor está no procedimento, não no código.
+Precisa de um regulamento e um suplemento reais para calibrar a leitura.
+
 **Task 19 — instalação na máquina da empresa.** Verificar Word COM
 (`scripts/fumaca_pdf.py`), Python e Claude Code. Guardar as wheels para
 instalação offline.

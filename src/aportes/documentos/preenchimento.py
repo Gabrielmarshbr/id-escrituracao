@@ -8,7 +8,7 @@ from pathlib import Path
 
 from docxtpl import DocxTemplate
 
-from aportes.documentos.validador import tags_da_minuta
+from aportes.documentos.validador import tags_exigidas
 
 
 class CampoFaltando(Exception):
@@ -16,9 +16,10 @@ class CampoFaltando(Exception):
 
 
 def preencher(minuta: Path, dados: dict[str, str], destino: Path) -> None:
-    exigidas = tags_da_minuta(minuta)
+    # So sao exigidas as tags que de fato vao aparecer: uma tag dentro de
+    # `{% if pessoa_juridica %}` nao existe para pessoa fisica.
     faltando = sorted(
-        tag for tag in exigidas
+        tag for tag in tags_exigidas(minuta, dados)
         if not str(dados.get(tag, "")).strip()
     )
     if faltando:

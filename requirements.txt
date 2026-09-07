@@ -6,3 +6,4 @@ openpyxl==3.1.5
 pdfplumber==0.11.10
 pywin32==312
 pytest==9.1.1
+Flask==3.1.2

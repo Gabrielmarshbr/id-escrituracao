@@ -61,3 +61,41 @@ def validar_minuta(caminho: Path) -> list[str]:
         )
 
     return problemas
+
+
+_TOKEN = re.compile(
+    r"\{\{\s*(?P<tag>[a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}"
+    r"|\{%\s*if\s+(?P<condicao>.+?)\s*%\}"
+    r"|\{%\s*(?P<fim>endif)\s*%\}"
+)
+_VARIAVEL_SIMPLES = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
+
+
+def tags_exigidas(caminho: Path, dados: dict[str, str]) -> set[str]:
+    """As tags que realmente vao aparecer no documento, dados estes valores.
+
+    Uma tag dentro de `{% if x %}` com `x` vazio nao sai no documento, e por
+    isso nao pode ser exigida: exigi-la reprovaria, por exemplo, toda pessoa
+    fisica por "falta representante legal".
+
+    Condicao que nao seja uma variavel simples e tratada como ativa: na duvida,
+    exige o campo. Melhor parar do que gerar documento com buraco.
+    """
+    exigidas: set[str] = set()
+    pilha: list[bool] = []
+    for achado in _TOKEN.finditer(_texto_todo(caminho)):
+        if achado.group("fim"):
+            if pilha:
+                pilha.pop()
+        elif achado.group("condicao") is not None:
+            pilha.append(_condicao_ativa(achado.group("condicao"), dados))
+        elif all(pilha):
+            exigidas.add(achado.group("tag"))
+    return exigidas
+
+
+def _condicao_ativa(condicao: str, dados: dict[str, str]) -> bool:
+    condicao = condicao.strip()
+    if _VARIAVEL_SIMPLES.match(condicao):
+        return bool(str(dados.get(condicao, "")).strip())
+    return True

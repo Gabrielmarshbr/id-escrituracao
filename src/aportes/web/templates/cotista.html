@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block titulo %}Cadastrar cotista{% endblock %}
+{% block cabecalho %}Cadastrar um cotista{% endblock %}
+{% block subtitulo %}
+  Os dados saem da ficha cadastral, no Portal ID. Cadastre uma vez: depois esse
+  cotista nunca mais custa nada.
+{% endblock %}
+
+{% block conteudo %}
+
+{% if erro %}
+<div class="aviso parada"><p>{{ erro }}</p></div>
+{% endif %}
+
+<form method="post">
+  <div class="cartao">
+    <div class="dupla">
+      <div class="campo">
+        <label for="documento">CPF ou CNPJ</label>
+        <input id="documento" name="documento" required value="{{ documento }}">
+      </div>
+      <div class="campo">
+        <label for="tipo">Tipo</label>
+        <select id="tipo" name="tipo">
+          {% for tipo in tipos %}
+            <option value="{{ tipo.value }}">{{ tipo.value | upper }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label for="nome">Nome ou razão social</label>
+      <input id="nome" name="nome" required>
+    </div>
+
+    <div class="campo">
+      <label for="categoria">Categoria CVM</label>
+      <select id="categoria" name="categoria">
+        <option value="">— não sei ainda —</option>
+        {% for categoria in categorias %}
+          <option value="{{ categoria.value }}">{{ categoria.value }}</option>
+        {% endfor %}
+      </select>
+      <p class="sub">Sem ela, o sistema não consegue julgar elegibilidade e vai
+         pedir a ficha.</p>
+    </div>
+
+    <h2>Dados que o Boletim de Subscrição usa</h2>
+    {% for campo in campos %}
+    <div class="campo">
+      <label for="{{ campo }}">{{ campo | replace('_', ' ') | capitalize }}</label>
+      <input id="{{ campo }}" name="{{ campo }}">
+    </div>
+    {% endfor %}
+
+    <div class="campo">
+      <label for="fonte">De onde vieram estes dados</label>
+      <input id="fonte" name="fonte" value="ficha cadastral do Portal ID">
+      <p class="sub">Fica gravado junto com a data. Quando duas fontes
+         discordarem, é a data que resolve.</p>
+    </div>
+
+    <button type="submit">Salvar cotista</button>
+  </div>
+</form>
+
+<p><a href="{{ url_for('inicio') }}">← Voltar</a></p>
+
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block titulo %}Resultado{% endblock %}
+{% block cabecalho %}Resultado da análise{% endblock %}
+{% block subtitulo %}
+  {{ boleta.documento_cotista | documento }} — {{ boleta.classe_id }} —
+  R$ {{ boleta.valor | reais }}
+{% endblock %}
+
+{% block conteudo %}
+
+{% if ja_vista %}
+<div class="aviso atencao">
+  <p class="rotulo">Esta boleta já foi processada</p>
+  <p>Alguém da equipe já cuidou dela. Nada foi gerado de novo — os documentos
+     originais continuam onde estavam.</p>
+</div>
+
+{% elif veredito.situacao.value == 'liberada' and not falha %}
+<div class="aviso ok">
+  <p class="rotulo">Liberada</p>
+  <p>{{ veredito.motivo }}</p>
+</div>
+{% if gerados %}
+<div class="cartao">
+  <h2 style="margin-top:0">Documentos gerados</h2>
+  <ul>{% for caminho in gerados %}<li><code>{{ caminho }}</code></li>{% endfor %}</ul>
+  <p class="sub">Confira antes de subir no Portal ID. A aprovação continua sendo
+     um ato seu, no portal.</p>
+</div>
+{% endif %}
+
+{% elif veredito.situacao.value == 'liberada' and falha %}
+<div class="aviso parada">
+  <p class="rotulo">Passou nas regras, mas o documento não saiu</p>
+  <p>{{ falha }}</p>
+  <p class="sub">A boleta não foi marcada como processada — dá para tentar de
+     novo depois de resolver isso.</p>
+</div>
+
+{% elif veredito.situacao.value == 'nao_elegivel' %}
+<div class="aviso parada">
+  <p class="rotulo">Não elegível</p>
+  <p>{{ veredito.motivo }}</p>
+  <p class="sub">Se você discorda, o que precisa mudar é o fato — a
+     qualificação do cotista ou a regra da classe —, não o resultado.</p>
+</div>
+
+{% elif veredito.situacao.value == 'precisa_de_voce' %}
+<div class="aviso atencao">
+  <p class="rotulo">Precisa de análise humana</p>
+  <p>{{ veredito.motivo }}</p>
+  <p class="sub">Nenhum documento foi gerado. Este é o tipo de decisão que o
+     sistema não toma.</p>
+</div>
+
+{% else %}
+<div class="aviso atencao">
+  <p class="rotulo">Faltou dado</p>
+  <p>{{ veredito.motivo }}</p>
+</div>
+{% endif %}
+
+{% if veredito.pendencias %}
+<div class="cartao">
+  <h2 style="margin-top:0">O que fazer</h2>
+  <ul>{% for pendencia in veredito.pendencias %}<li>{{ pendencia }}</li>{% endfor %}</ul>
+  {% if not cotista %}
+  <p><a href="{{ url_for('formulario_cotista', documento=boleta.documento_cotista) }}">
+     Cadastrar este cotista agora</a></p>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="cartao">
+  <h2 style="margin-top:0">O que foi analisado</h2>
+  <table>
+    <tr><td>Cotista</td><td>
+      {{ boleta.documento_cotista | documento }}
+      {% if cotista %}— {{ cotista.nome }}{% else %}(não está na base){% endif %}
+    </td></tr>
+    {% if cotista and cotista.categoria %}
+    <tr><td>Categoria CVM</td><td>
+      {{ cotista.categoria.value }}
+      <span class="ajuda">(segundo {{ cotista.categoria_procedencia }})</span>
+    </td></tr>
+    {% endif %}
+    <tr><td>Classe</td><td>{{ boleta.classe_id }}</td></tr>
+    <tr><td>Oferta</td><td>{{ boleta.oferta_id or '—' }}</td></tr>
+    <tr><td>Valor</td><td>R$ {{ boleta.valor | reais }}</td></tr>
+    <tr><td>Data</td><td>{{ boleta.data.strftime('%d/%m/%Y') }}</td></tr>
+  </table>
+</div>
+
+<p><a href="{{ url_for('inicio') }}">← Analisar outra boleta</a></p>
+
+{% endblock %}

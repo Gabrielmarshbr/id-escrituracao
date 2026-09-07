@@ -1,0 +1,11 @@
+# Uma entrada por CLASSE de fundo. Registre uma vez; nunca mais e perguntado.
+# O 'fonte' e o 'lido_em' aparecem no veredito quando a regra reprova alguem.
+#
+# - id: F1/A                             # chave usada nas boletas
+#   fundo_nome: Fundo Exemplo FIDC
+#   fundo_cnpj: "11.111.111/0001-11"
+#   nome: Classe A
+#   condominio: fechado                  # aberto | fechado
+#   qualificacao_exigida: profissional   # geral | qualificado | profissional
+#   fonte: regulamento
+#   lido_em: 2026-01-15

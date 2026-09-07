@@ -11,7 +11,15 @@ BOLETIM = "boletim_subscricao"
 TERMO_ADESAO = "termo_adesao"
 
 
-def avaliar(boleta: Boleta, base: Base) -> Veredito:
+def avaliar(boleta: Boleta, base: Base,
+            primeiro_aporte_informado: bool | None = None) -> Veredito:
+    """Decide o que fazer com uma boleta.
+
+    `primeiro_aporte_informado` é a resposta de uma pessoa para quando não há
+    Saldo de Aplicações daquele fundo. Ela é usada, mas o veredito diz que veio
+    de pessoa — fato informado não pode se passar por fato apurado. Havendo
+    saldo carregado, o arquivo vence a resposta.
+    """
     cotista = base.cotistas.get(boleta.documento_cotista)
     if cotista is None:
         return Veredito(
@@ -31,7 +39,8 @@ def avaliar(boleta: Boleta, base: Base) -> Veredito:
             ),
         )
 
-    if not base.conhece_saldo_do_fundo(classe.fundo_cnpj):
+    if (not base.conhece_saldo_do_fundo(classe.fundo_cnpj)
+            and primeiro_aporte_informado is None):
         return Veredito(
             situacao=Situacao.FALTOU_DADO,
             motivo=(
@@ -96,15 +105,24 @@ def avaliar(boleta: Boleta, base: Base) -> Veredito:
 
     # O Termo de Adesao e um por cotista por FUNDO, nao por classe: quem ja
     # aderiu ao fundo por outra classe nao assina de novo.
-    primeiro_aporte = not base.tem_posicao_no_fundo(
-        boleta.documento_cotista, classe.fundo_cnpj
-    )
+    if base.conhece_saldo_do_fundo(classe.fundo_cnpj):
+        primeiro_aporte = not base.tem_posicao_no_fundo(
+            boleta.documento_cotista, classe.fundo_cnpj
+        )
+        origem = "Saldo de Aplicacoes"
+    else:
+        primeiro_aporte = primeiro_aporte_informado
+        origem = "informado por quem operou"
+
     if primeiro_aporte:
         documentos.append(TERMO_ADESAO)
 
+    situacao_aporte = (
+        "primeiro aporte no fundo" if primeiro_aporte else "aporte subsequente"
+    )
     motivo = (
         f"classe {classe.id}, condominio {classe.condominio.value}, "
-        f"{'primeiro aporte no fundo' if primeiro_aporte else 'aporte subsequente'}"
+        f"{situacao_aporte} ({origem})"
     )
 
     return Veredito(

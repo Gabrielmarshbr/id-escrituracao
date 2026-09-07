@@ -12,3 +12,4 @@ __pycache__/
 ~$*
 *.tmp
 .pytest_cache/
+config.local.json

@@ -1,0 +1,10 @@
+{
+  "_comentario": [
+    "Copie este arquivo como config.local.json e ajuste os caminhos.",
+    "config.local.json NAO vai para o git: ele aponta para a pasta da empresa.",
+    "Deixe a pasta compartilhada (rede ou OneDrive CORPORATIVO) para a equipe",
+    "usar a mesma base. Nunca um OneDrive pessoal: e dado de investidor."
+  ],
+  "pasta_dados": "\\\\servidor\\escrituracao\\aportes\\dados",
+  "pasta_saida": "\\\\servidor\\escrituracao\\aportes\\saida"
+}

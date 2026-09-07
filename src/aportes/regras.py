@@ -30,12 +30,21 @@ def avaliar(boleta: Boleta, base: Base) -> Veredito:
             ),
         )
 
-    documentos: list[str] = [TERMO_ADESAO]
+    documentos: list[str] = []
     if classe.condominio is Condominio.FECHADO:
-        documentos.insert(0, BOLETIM)
+        documentos.append(BOLETIM)
+
+    primeiro_aporte = not base.tem_posicao(boleta.documento_cotista, classe.id)
+    if primeiro_aporte:
+        documentos.append(TERMO_ADESAO)
+
+    motivo = (
+        f"classe {classe.id}, condominio {classe.condominio.value}, "
+        f"{'primeiro aporte na classe' if primeiro_aporte else 'aporte subsequente'}"
+    )
 
     return Veredito(
         situacao=Situacao.LIBERADA,
-        motivo=f"classe {classe.id} e condominio {classe.condominio.value}",
+        motivo=motivo,
         documentos=tuple(documentos),
     )

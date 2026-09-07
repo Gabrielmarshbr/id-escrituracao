@@ -1,89 +1,75 @@
-# ID - Escrituração — retomada do brainstorming
+# ID - Escrituração — onde estamos
 
-Este arquivo existe pra você não perder o fio de novo. Abra o Claude Code
-**nesta pasta** e cole o bloco lá embaixo na primeira mensagem.
+Abra o Claude Code **nesta pasta**. Ele lê este arquivo e continua.
 
-O brainstorming começou em 05/09/2026 e parou em 06/09/2026, 01:55.
-O histórico completo daquela conversa está em `historico/`.
+**Última sessão: 07/09/2026.** O brainstorming terminou. A spec está escrita,
+aprovada em seções e commitada. O projeto saiu do papel.
 
 ---
 
-## Bloco pra colar na primeira mensagem
+## Leia nesta ordem
 
-```
-Vamos retomar um brainstorming interrompido. Use a skill
-superpowers:brainstorming, caminho ARQUITETURAL. Não escreva código nem
-crie repositório antes de eu aprovar o desenho.
+1. `docs/superpowers/specs/2026-09-07-aportes-design.md` — **a spec.** É a
+   fonte de verdade do desenho. 13 seções.
+2. `contexto/01-esteira-subscricao.md` e `contexto/02-escrituracao-4-microareas.md`
+   — o contexto operacional, nas palavras do Gabriel.
+3. `docs/superpowers/plans/` — o plano de implementação, se já existir.
+4. `historico/` — transcrição da sessão de 05-06/09/2026, que se perdeu por
+   falta de registro. É por isso que este arquivo existe.
 
-# Projeto: ID - Escrituração
+## O que o projeto é, em três frases
 
-Trabalho no mercado financeiro. Quero automatizar quatro coisas:
-criação de documentos, aprovação de boletas de aportes, confecção de
-suplementos de ofertas e verificação de aporte (se o cotista pode
-aportar naquele fundo e classe).
+Gabriel trabalha na microárea de **Aportes** da Escrituração de uma
+administradora de FIDCs: 20 a 50+ boletas de aplicação por dia, cada uma
+analisada e aprovada na mão. O gargalo não é preencher documento — é que cada
+boleta refaz consultas já respondidas antes (o condomínio do fundo, a
+qualificação da classe, as regras da oferta). A ferramenta é **memória**:
+transforma consulta repetida em fato registrado uma vez, e no fim gera o
+Boletim de Subscrição e o Termo de Adesão.
 
-O repositório ainda NÃO existe. Vai ser privado, na conta GitHub
-Gabrielmarshbr (o gh CLI já está instalado e autenticado nela). No
-GitHub o nome vira "id-escrituracao"; a pasta local mantém o nome
-bonito. A pasta local já existe: ~/Desktop/ID - Escrituração
+## Decisões fechadas — não reabrir sem motivo
 
-## O que já foi decidido
+- **Python + docxtpl + Word COM para PDF.** As tags moram no `.docx`, para o
+  Gabriel editar o modelo no Word sem depender de programador.
+- **Duas camadas:** Claude Code lê o print da fila de boletas e **transcreve**;
+  o núcleo Python **decide e gera**. A transcrição é conferida pelo Gabriel
+  antes de virar documento.
+- **Duas máquinas:** desenvolve aqui (máquina pessoal), roda na máquina da
+  empresa. Ele confirmou que pode instalar Python e Claude Code lá.
+- **LGPD:** conhecimento operacional (`src/`, `regras/`, `modelos/`) sobe para
+  o GitHub; dado pessoal de cotista (`dados/`, `saida/`) nunca sai da máquina.
+- **Fora de escopo agora:** Slack, login no Portal ID, leitura do suplemento
+  PDF, vínculo societário de oferta privada, amortização.
 
-Os quatro itens foram decompostos em subprojetos, sobre um núcleo
-compartilhado (cadastro de fundos, classes, cotistas e regras de cada
-classe):
-  1. Verificação de aporte — motor de regras
-  2. Aprovação de boletas — fluxo operacional (depende do 1)
-  3. Criação de documentos — geração a partir de modelo + dados
-  4. Suplemento de oferta — caso específico do 3 (depende do 3)
+## O que trava a implementação
 
-COMEÇAMOS PELO ITEM 3 (criação de documentos). Cada subprojeto terá sua
-própria spec. Não misture os outros três agora.
+Sem estes arquivos não dá para escrever os leitores nem testes de verdade.
+Todos vêm da máquina da empresa, **anonimizados**:
 
-A ABORDAGEM JÁ FOI ESCOLHIDA: **A — Python + docxtpl (tags {{ campo }}
-e condicionais {% if %} dentro do próprio Word) + Word COM para gerar o
-PDF.** O argumento decisivo foi eu mesmo conseguir editar modelo e criar
-seção condicional sem depender de programador. As alternativas B
-(python-docx com marcadores) e C (PowerShell + Word COM fazendo tudo)
-foram descartadas.
+- [ ] Minuta `.docx` do **Boletim de Subscrição**
+- [ ] Minuta `.docx` do **Termo de Adesão**
+- [ ] **Saldo de Aplicações** (Britech, Excel)
+- [ ] **Excel de cotistas** (Portal ID)
+- [ ] **Ficha cadastral** em PDF: uma PF, uma PJ, uma de fundo
+- [ ] **Print** da página de boletas do Portal ID
 
-## Requisitos levantados
+E duas coisas a verificar na máquina da empresa:
 
-- Formato: modelo .docx entra, PDF sai. Ninguém edita depois; o PDF é
-  o que circula. A formatação da casa (estilos, numeração, sumário)
-  precisa sair intacta.
-- Fonte dos dados: sistema interno, acessado por EXPORTAÇÃO CSV/Excel
-  (não por API). Sem credencial, sem rede.
-- Volume: 2 a 5 modelos fixos, dezenas de documentos por semana.
-  O ganho está em processar a planilha inteira em lote.
-- Conferência: por amostragem. Preciso de um relatório do lote dizendo
-  o que gerou, com que dados, e o que se recusou a gerar por dado
-  faltando.
-- Risco conhecido: a autocorreção do Word quebra as tags {{ }}. Defesa
-  acordada: validar o modelo antes de rodar o lote.
+- [ ] O Saldo de Aplicações separa a posição **por classe**? A regra do Termo
+      de Adesão depende disso (é por classe, não por fundo).
+- [ ] A exportação de boletas traz **número/código da boleta**? É a chave de
+      deduplicação.
 
-## Ambiente já verificado nesta máquina
+## Como o Gabriel gosta de trabalhar
 
-- Windows 10 Home, PowerShell
-- Word 16.0 com COM funcionando (testado) → converte .docx em PDF com
-  fidelidade total
-- Python 3.12.10 instalado
-- LibreOffice NÃO instalado
-- gh 2.98.0 autenticado na conta Gabrielmarshbr
-- PyPI acessível: docxtpl 0.20.2 + Jinja2, lxml, python-docx, tudo em
-  wheel, sem compilador. NADA foi instalado ainda (só --dry-run).
-- Máquina corporativa sem trava de instalação hoje — mas o desenho deve
-  deixar a instalação reproduzível e auditável, porque "sem trava hoje"
-  não é "sem trava sempre".
+Pergunte **em texto corrido, uma coisa por mensagem**. Ele recusa painel de
+múltipla escolha e responde em prosa longa, trazendo contexto que nenhuma
+alternativa pré-escrita capturaria.
 
-## Onde exatamente paramos
+## Repositório
 
-A abordagem A acabou de ser fechada. Faltavam TRÊS perguntas
-estruturantes, e a primeira nem chegou a ser respondida:
-
-  **como a planilha vira documentos** — uma linha = um documento? uma
-  planilha = um lote? como o modelo certo é escolhido para cada linha?
-
-Retome daí: faça essa pergunta, depois as outras duas, e siga para o
-desenho.
-```
+Ainda **não existe no GitHub**. Será privado, `id-escrituracao`, conta
+`Gabrielmarshbr` (`gh` já autenticado). Git local já iniciado, com `.gitignore`
+protegendo `dados/` e `saida/` desde antes do primeiro commit. **Não crie nem
+envie nada sem autorização explícita.** Antes do primeiro push, decidir o que
+fazer com `historico/` — recomendação: tirar do git.

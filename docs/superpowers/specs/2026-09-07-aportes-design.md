@@ -42,9 +42,11 @@ registrados uma vez.
   exportado, PDF baixado à mão, ou print de tela.
 - **A aprovação final no Portal ID é sempre manual.** A ferramenta chega até a
   porta do portal com parecer e documentos prontos; não aprova nada.
-- **Máquina corporativa Windows**, sem trava de instalação hoje — mas a
-  instalação precisa ser reproduzível e auditável, porque "sem trava hoje" não
-  é "sem trava sempre".
+- **Duas máquinas.** O desenvolvimento acontece na máquina pessoal do Gabriel;
+  a ferramenta **roda na máquina da empresa**, porque é lá que estão os
+  relatórios do Britech, os prints do Portal ID e as fichas dos cotistas, e é
+  de lá que os documentos sobem para o portal. Levar dado de cotista para
+  máquina pessoal contraria a seção 3. Ver seção 13.
 
 ---
 
@@ -80,7 +82,10 @@ praticamente não testável).
 O Word COM faz **só o último passo**: `.docx` preenchido → PDF, com a
 fidelidade que só o Word tem.
 
-### Ambiente verificado nesta máquina
+### Ambiente verificado — **na máquina pessoal**
+
+Estes fatos foram testados na máquina de desenvolvimento. **Nenhum deles vale
+para a máquina da empresa** até ser verificado lá (ver seção 13).
 
 - Windows 10 Home, PowerShell
 - Word 16.0 com COM funcionando (testado)
@@ -456,4 +461,49 @@ Coisas a verificar ao começar, não decididas aqui:
    ficha de fundo, print da página de boletas, e as minutas `.docx` do Boletim
    de Subscrição e do Termo de Adesão.
 4. **Repositório GitHub.** Privado, `id-escrituracao`, conta `Gabrielmarshbr`.
-   Criado e enviado só mediante autorização explícita.
+   Criado e enviado só mediante autorização explícita. Antes do primeiro push,
+   decidir o que fazer com `historico/` — é transcrição de conversa, o tipo de
+   arquivo onde nomes aparecem sem ninguém perceber. Recomendação: tirar do git
+   e manter só local.
+
+---
+
+## 13. Duas máquinas
+
+O desenvolvimento acontece na máquina pessoal. A ferramenta roda na máquina da
+empresa. Isso não é preferência: os dados estão lá, os documentos sobem de lá,
+e a seção 3 proíbe trazer dado de cotista para cá.
+
+### O que a máquina da empresa precisa
+
+| | Situação |
+|---|---|
+| **Word** | Certamente já instalado. Sem preocupação. |
+| **Python + bibliotecas** | Gabriel confirmou que **pode instalar**. |
+| **Claude Code** | Gabriel confirmou que **pode instalar**. |
+| **Git** | **Não é necessário para rodar.** Só para desenvolver e atualizar. |
+
+### Consequências no desenho
+
+**Claude Code na máquina da empresa é pré-requisito da entrada por print.** A
+camada que lê o print é o Claude Code. Se ele não puder rodar lá — instalação
+bloqueada ou saída de rede para a Anthropic barrada, comum em ambiente
+corporativo — o núcleo Python continua funcionando, mas a entrada volta a ser a
+exportação da planilha de boletas. **Verificar cedo**: instalar e rodar um
+comando trivial, antes de qualquer coisa depender disso.
+
+**A instalação precisa ser reproduzível.** `requirements.txt` com versões
+travadas e ambiente virtual dentro da pasta do projeto. As wheels ficam
+guardadas para permitir instalação offline — "posso instalar hoje" não é
+"poderei instalar sempre", e refazer a instalação não pode depender de o PyPI
+estar liberado naquele dia.
+
+**Como o código chega lá.** Com Git instalado, `git clone` e depois `git pull`
+para atualizar. Sem Git, copiar a pasta (pendrive ou rede) e substituir. Os
+dois funcionam; o segundo é mais manual. Não é decisão que precise ser tomada
+agora.
+
+**O que nunca atravessa.** `dados/` e `saida/` existem só na máquina da
+empresa. Não vêm para cá nem para o GitHub — nem para depurar. Se um leitor
+falhar com um arquivo real, o que atravessa é uma **cópia anonimizada** feita
+lá, ou a mensagem de erro.

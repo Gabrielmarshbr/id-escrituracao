@@ -2,14 +2,19 @@
 
 Abra o Claude Code **nesta pasta**. Ele lê este arquivo e continua.
 
-**Última sessão: 07/09/2026.** O brainstorming terminou. A spec está escrita,
-aprovada em seções e commitada. O projeto saiu do papel.
+**Última sessão: 07/09/2026.** O brainstorming terminou, a spec está escrita e
+o núcleo está construído e testado (142 testes). Existe uma página no navegador
+que já gera Boletim e Termo de Adesão em PDF, ponta a ponta — verificado com o
+Word de verdade.
+
+**Para começar a usar, leia [`COMECAR.md`](COMECAR.md).**
 
 ---
 
 ## Leia nesta ordem
 
-0. `INSTALAR.md` — como levar e rodar o projeto na máquina da empresa.
+0. `COMECAR.md` — os três passos até a primeira boleta gerar documento.
+0b. `INSTALAR.md` — como levar e instalar na máquina da empresa.
 1. `docs/superpowers/specs/2026-09-07-aportes-design.md` — **a spec.** É a
    fonte de verdade do desenho. 13 seções.
 2. `contexto/01-esteira-subscricao.md` e `contexto/02-escrituracao-4-microareas.md`
@@ -42,13 +47,24 @@ Boletim de Subscrição e o Termo de Adesão.
 - **Fora de escopo agora:** Slack, login no Portal ID, leitura do suplemento
   PDF, vínculo societário de oferta privada, amortização.
 
-## O que trava a implementação
+## O que trava o uso, hoje
 
-Sem estes arquivos não dá para escrever os leitores nem testes de verdade.
-Todos vêm da máquina da empresa, **anonimizados**:
+**O mais urgente, e é do Gabriel:** marcar as duas minutas com as tags. Sem
+elas nenhum documento é gerado. A lista de tags está em `modelos/CAMPOS.md`, e
+os arquivos precisam ter estes nomes exatos:
 
-- [ ] Minuta `.docx` do **Boletim de Subscrição**
-- [ ] Minuta `.docx` do **Termo de Adesão**
+- [ ] `modelos/boletim_subscricao.docx`
+- [ ] `modelos/termo_adesao.docx`
+
+Depois disso, cadastrar em `regras/fundos.yaml` e `regras/ofertas.yaml` os
+fundos e ofertas que forem aparecendo — um por vez, na primeira boleta de cada.
+
+## O que trava as próximas etapas
+
+Os leitores de relatório não podem ser escritos sem ver o formato real. **Não
+precisam ser anonimizados para viajar**: com o Claude Code rodando na máquina da
+empresa, os arquivos reais são lidos lá e o que vai para o git é um arquivo de
+teste com o mesmo layout e dados fictícios.
 - [ ] **Saldo de Aplicações** (Britech, Excel)
 - [ ] **Excel de cotistas** (Portal ID)
 - [ ] **Ficha cadastral** em PDF: uma PF, uma PJ, uma de fundo
@@ -58,7 +74,8 @@ E duas coisas a verificar na máquina da empresa:
 
 - [x] O Saldo de Aplicações separa a posição **por classe**? **Sim** (confirmado
       em 07/09/2026). O leitor deve produzir, por linha: documento do cotista,
-      CNPJ do fundo e id da classe.
+      CNPJ do fundo e id da classe. A costura já existe em
+      `base/repositorio.py::carregar_posicoes`.
 - [ ] A exportação de boletas traz **número/código da boleta**? É a chave de
       deduplicação.
 
@@ -75,3 +92,18 @@ Ainda **não existe no GitHub**. Será privado, `id-escrituracao`, conta
 protegendo `dados/` e `saida/` desde antes do primeiro commit. **Não crie nem
 envie nada sem autorização explícita.** Antes do primeiro push, decidir o que
 fazer com `historico/` — recomendação: tirar do git.
+
+## Estado do código
+
+Construído e testado: motor de regras, valor por extenso, base compartilhada
+(um arquivo por pessoa), leitura de `regras/*.yaml`, validação e preenchimento
+de minuta, conversão em PDF pelo Word, emissão tudo-ou-nada, e a página no
+navegador com cadastro de cotista.
+
+Não construído, por depender de arquivos reais: os leitores do Saldo de
+Aplicações (Britech), do Excel de cotistas e das fichas em PDF, e a entrada por
+print no Claude Code. Estão como tasks 14 a 20 no plano.
+
+**Regra de segurança que não se mexe:** sem Saldo de Aplicações carregado, o
+sistema não presume primeiro aporte. Ou a pessoa responde na tela — e fica
+registrado que a resposta veio de pessoa —, ou vira pendência.

@@ -5,6 +5,7 @@ Nao le disco, nao gera documento, nao aprova nada.
 """
 
 from aportes.dominio import Base, Boleta, Condominio, Situacao, Veredito
+from aportes.qualificacao import atende, mais_restritiva
 
 BOLETIM = "boletim_subscricao"
 TERMO_ADESAO = "termo_adesao"
@@ -27,6 +28,52 @@ def avaliar(boleta: Boleta, base: Base) -> Veredito:
             pendencias=(
                 f"confira o regulamento no Slack e registre a classe "
                 f"{boleta.classe_id} em regras/fundos.yaml",
+            ),
+        )
+
+    oferta = base.ofertas.get(boleta.oferta_id) if boleta.oferta_id else None
+    if oferta is None:
+        return Veredito(
+            situacao=Situacao.FALTOU_DADO,
+            motivo=f"oferta {boleta.oferta_id} desconhecida",
+            pendencias=(
+                f"registre a oferta {boleta.oferta_id} em regras/ofertas.yaml, "
+                "a partir do suplemento assinado",
+            ),
+        )
+
+    if cotista.categoria is None:
+        return Veredito(
+            situacao=Situacao.FALTOU_DADO,
+            motivo=f"categoria CVM de {cotista.nome} desconhecida",
+            pendencias=(
+                f"baixe a ficha cadastral de {cotista.nome} no Portal ID "
+                "para registrar a categoria",
+            ),
+        )
+
+    exigida = mais_restritiva(
+        classe.qualificacao_exigida, oferta.qualificacao_exigida
+    )
+    if not atende(cotista.categoria, exigida):
+        return Veredito(
+            situacao=Situacao.NAO_ELEGIVEL,
+            motivo=(
+                f"exige {exigida.value}; {cotista.nome} consta como "
+                f"{cotista.categoria.value}, segundo "
+                f"{cotista.categoria_procedencia}"
+            ),
+        )
+
+    if not oferta.publica:
+        return Veredito(
+            situacao=Situacao.PRECISA_DE_VOCE,
+            motivo=(
+                f"oferta {oferta.id} e privada: exige verificacao de vinculo "
+                "societario ou familiar com os demais cotistas"
+            ),
+            pendencias=(
+                "confirme o vinculo e mande gerar os documentos manualmente",
             ),
         )
 

@@ -97,6 +97,39 @@ para a máquina da empresa** até ser verificado lá (ver seção 13).
 
 ---
 
+## 2b. Duas portas para duas pessoas
+
+A equipe de Aportes tem mais de uma pessoa na mesma fila de boletas, e nem todas
+usam Claude Code. O desenho comporta isso sem mudar o núcleo, porque o núcleo
+nunca soube que o Claude Code existia: ele recebe dados e devolve veredito.
+Qualquer fachada pode ser posta na frente dele.
+
+**Porta A — Claude Code (Gabriel).** Cola o print da fila de boletas, a
+transcrição é conferida, o bloco inteiro é processado de uma vez. Também é por
+aqui que entram os documentos que viram regra (seção 5, quarta porta).
+
+**Porta B — página no navegador (o resto da equipe).** Um atalho na área de
+trabalho sobe o programa e abre uma página local. Formulário com os campos da
+boleta, botão gerar, resultado nos mesmos três montes. Sem terminal, sem
+Claude Code, sem conta em lugar nenhum. Navegador porque todo mundo já sabe usar
+um, e a tela fica igual em qualquer máquina.
+
+**O que a porta B não tem:** leitura de print. Quem lê a imagem é o Claude Code.
+Sem ele, a entrada é digitar os dados da boleta — que continua sendo ganho
+grande, porque o que se elimina é formatar documento, conferir regra de cabeça e
+esquecer campo.
+
+**Divisão de responsabilidade.** `regras/fundos.yaml` e `regras/ofertas.yaml`
+são editados pelo Gabriel, que responde pela área. A porta B **lê** as regras e
+nunca as escreve: quando falta um fundo ou uma oferta, ela diz o que falta e
+para. Isso é limite de desenho, não limitação técnica — quem decide que um fundo
+é fechado é quem responde por isso.
+
+Ambas as portas gravam na mesma base compartilhada, cada pessoa no seu arquivo
+(seção 4).
+
+---
+
 ## 3. Privacidade e LGPD
 
 **Regra:** conhecimento operacional sobe para o GitHub; dado pessoal nunca sai
@@ -113,6 +146,21 @@ empresa morando numa conta GitHub pessoal.
 | `regras/` — fundos e ofertas (YAML) | `dados/saldos/` — exportações do Britech |
 | `modelos/` — as minutas `.docx` | `dados/boletas.json` |
 | `docs/`, `contexto/` | `saida/` — os PDFs gerados |
+
+**Onde a pasta compartilhada fica.** `dados/` e `saida/` passam a viver numa
+pasta de rede da empresa ou no OneDrive **corporativo** — nunca num OneDrive
+pessoal. É dado de investidor da administradora; o lugar dele é infraestrutura
+da empresa. O caminho é configurável, para que cada máquina aponte para o mesmo
+lugar sem nada ficar cravado no código.
+
+**O limite honesto da pasta compartilhada.** Sincronização tem atraso de
+minutos. Se duas pessoas pegarem a mesma boleta ao mesmo tempo, as duas
+processam. O estrago é pequeno — o sistema se recusa a sobrescrever documento
+existente e avisa —, mas não é zero. A alternativa que elimina isso é um
+servidor central com os dois acessando pelo navegador; é mais robusto e é mais
+projeto, porque precisa de máquina ligada e de conversa com a TI. Começar pelos
+arquivos por pessoa resolve quase tudo com quase nenhum custo, e não fecha a
+porta para o servidor depois: o núcleo continua o mesmo.
 
 Duas defesas, porque `.gitignore` sozinho depende de disciplina:
 
@@ -158,7 +206,7 @@ que hoje só existe na cabeça do Gabriel e no Slack.
 A que classe pertence, **pública ou privada**, qualificação exigida quando
 difere da classe, valor mínimo, vigência.
 
-### `dados/cotistas.json`
+### `dados/cotistas.<usuario>.json` — um arquivo por pessoa
 
 Nome/razão social, CPF/CNPJ, tipo (PF / PJ / fundo), categoria CVM, endereço,
 dados bancários, e-mail, representante legal com CPF (quando PJ ou fundo).
@@ -166,6 +214,20 @@ dados bancários, e-mail, representante legal com CPF (quando PJ ou fundo).
 Cada bloco de campos carrega **de onde veio e quando** (cadastro da ficha
 baixada em tal data; qualificação do Excel de tal data). Quando as fontes
 discordarem, a data resolve — e o veredito mostra a procedência.
+
+**Por que um arquivo por pessoa.** A equipe usa a base ao mesmo tempo, sobre a
+mesma fila de boletas. Se todos gravassem num arquivo só, numa pasta de rede,
+uma gravação sobrescreveria a outra em silêncio — e o OneDrive resolveria isso
+criando um "arquivo em conflito" que ninguém percebe.
+
+Cada pessoa escreve **apenas o seu** arquivo; na leitura, todos são fundidos
+numa base só. Escrita simultânea deixa de ser possível — não por trava, mas
+porque não existe arquivo disputado. A fusão usa a mesma função `mesclar` que
+resolve divergência entre as três fontes de dados: vence o bloco mais novo,
+pela data da procedência, não por quem escreveu.
+
+Efeito colateral bem-vindo: como cada arquivo tem dono, "quem cadastrou este
+cotista e quando" é respondível sem construir nada para isso.
 
 ### `dados/saldos/` — posições
 
@@ -177,10 +239,21 @@ perceber.
 Daí saem duas respostas: "é primeiro aporte neste fundo?" e a % de
 participação no PL para a Lista de Cotistas.
 
-### `dados/boletas.json`
+**A base sabe quais fundos ela não conhece.** Ausência de posição só significa
+"primeiro aporte" se houver um Saldo de Aplicações carregado *daquele fundo*.
+Sem isso, toda boleta pareceria primeiro aporte e sairia Termo de Adesão
+indevido em silêncio — a falha mais cara que este desenho pode ter. O carregador
+registra quais CNPJs de fundo os saldos cobrem; boleta de fundo não coberto vira
+pendência, nunca presunção.
+
+### `dados/boletas.<usuario>.json` — um arquivo por pessoa
 
 O que já foi processado e quais documentos saíram. É a memória que faz o print
-seguinte mostrar só o que é novo.
+seguinte mostrar só o que é novo. Na leitura, a memória é a **união** de todos
+os arquivos: uma boleta processada por qualquer pessoa da equipe não reaparece
+para as outras.
+
+Mesma divisão por dono, e mesma trilha de auditoria de graça.
 
 ---
 
@@ -267,6 +340,11 @@ Uma vez por fundo, na vida.
 Aberto → **não existe Boletim de Subscrição**, e ela diz isso em vez de gerar um
 documento que não deveria existir. Isso não interrompe a boleta: o Termo de
 Adesão ainda pode sair, pela regra 3.
+
+**2b. Tenho um Saldo de Aplicações deste fundo?**
+Se nenhum saldo carregado cobre o CNPJ do fundo, para: *"não sei a posição
+deste fundo — exporte o Saldo de Aplicações do Britech"*. Sem isso a pergunta 3
+não tem resposta, e presumir seria gerar Termo de Adesão indevido.
 
 **3. É o primeiro aporte deste cotista neste fundo?**
 A chave é **cotista + fundo**, não cotista + classe: é um Termo de Adesão por

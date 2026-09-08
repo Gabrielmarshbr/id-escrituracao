@@ -79,7 +79,8 @@ resultado vem em um de quatro estados:
 Se o cotista ainda não estiver na base, a própria tela oferece cadastrá-lo. Uma
 vez cadastrado, ele nunca mais custa nada.
 
-**Para você, no Claude Code** — abra o projeto e cole o print da fila de
+**Para você, no Claude Code** — abra o projeto, digite `/retomar` para ele
+recuperar o contexto, e cole o print da fila de
 boletas. Eu transcrevo, você confere, e o bloco inteiro é processado de uma vez.
 
 **Aprovar no Portal ID continua manual**, nos dois casos. O que o sistema faz é

@@ -1,6 +1,7 @@
 # ID - Escrituração — onde estamos
 
-Abra o Claude Code **nesta pasta**. Ele lê este arquivo e continua.
+Abra o Claude Code **nesta pasta** e digite **`/retomar`**. Ele lê este
+arquivo, confere o estado do projeto e diz onde paramos.
 
 **Última sessão: 07/09/2026.** O brainstorming terminou, a spec está escrita e
 o núcleo está construído e testado (142 testes). Existe uma página no navegador

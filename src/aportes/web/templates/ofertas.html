@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% set aba = 'ofertas' %}
+{% block titulo %}Ofertas{% endblock %}
+{% block cabecalho %}Ofertas{% endblock %}
+{% block contexto %}
+  {{ ofertas | length }} de {{ total }} oferta{{ 's' if total != 1 }} ·
+  {{ usuario }}
+{% endblock %}
+
+{% block conteudo %}
+
+{% if erro %}
+<div class="aviso parada">
+  <p class="rotulo">Não deu para registrar</p>
+  <p>{{ erro }}</p>
+</div>
+{% endif %}
+
+<form class="busca" method="get">
+  <input name="q" value="{{ busca }}" autofocus
+         placeholder="buscar por oferta, classe ou fundo">
+  <button type="submit">Buscar</button>
+  {% if busca %}<a class="botao fantasma" href="{{ url_for('ofertas') }}">Limpar</a>{% endif %}
+</form>
+
+{% if ofertas %}
+<table class="lista">
+  <thead>
+    <tr>
+      <th>Oferta</th><th>Classe</th><th>Tipo</th><th>Exige</th>
+      <th>Mínimo</th><th>Vigência</th><th>Documentos</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for oferta in ofertas %}
+    {% set classe = classes.get(oferta.classe_id) %}
+    <tr>
+      <td><strong>{{ oferta.id }}</strong></td>
+      <td>
+        {% if classe %}{{ classe.fundo_nome }}<br>
+          <span class="aj">{{ classe.nome }}</span>
+        {% else %}<span class="aj">{{ oferta.classe_id }} (classe não cadastrada)</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if oferta.publica %}<span class="marca publica">pública</span>
+        {% else %}<span class="marca privada">privada</span>{% endif %}
+      </td>
+      <td>{{ oferta.qualificacao_exigida.value if oferta.qualificacao_exigida
+             else '—' }}</td>
+      <td>{{ ('R$ ' + (oferta.valor_minimo | reais)) if oferta.valor_minimo else '—' }}</td>
+      <td>{{ oferta.vigencia_ate.strftime('%d/%m/%Y') if oferta.vigencia_ate else '—' }}</td>
+      <td class="anexo">
+        {% for nome in documentos.get(oferta.id, []) %}
+          <a href="{{ url_for('baixar', tipo='ofertas', chave=oferta.id, nome=nome) }}">{{ nome }}</a>
+        {% else %}
+          <span class="aj">nenhum</span><br>
+        {% endfor %}
+        <form class="anexar" method="post" enctype="multipart/form-data"
+              action="{{ url_for('anexar_a_oferta', oferta_id=oferta.id) }}">
+          <label class="enviar">anexar suplemento
+            <input type="file" name="arquivo" accept=".pdf,.docx,.doc"
+                   onchange="this.form.submit()">
+          </label>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% elif busca %}
+<p class="vazio">Nenhuma oferta encontrada para “{{ busca }}”.</p>
+{% else %}
+<p class="vazio">Nenhuma oferta cadastrada ainda. Registre a primeira abaixo —
+   os dados saem do suplemento assinado.</p>
+{% endif %}
+
+<details class="novo" {% if not ofertas and not busca %}open{% endif %}>
+  <summary>+ Registrar uma oferta nova</summary>
+  <form method="post" style="margin-top:.9rem">
+    <div class="grade">
+      <div>
+        <label for="id">Identificador da oferta</label>
+        <input id="id" name="id" required placeholder="1a-emissao">
+      </div>
+      <div class="largo">
+        <label for="classe_id">Classe</label>
+        <select id="classe_id" name="classe_id" required>
+          <option value="">— escolha —</option>
+          {% for id, classe in classes | dictsort %}
+            <option value="{{ id }}">{{ classe.fundo_nome }} — {{ classe.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="publica">Pública ou privada</label>
+        <select id="publica" name="publica" required>
+          <option value="">— escolha —</option>
+          <option value="sim">pública</option>
+          <option value="nao">privada</option>
+        </select>
+      </div>
+      <div>
+        <label for="qualificacao_exigida">Qualificação
+          <span class="aj">(só se for além da classe)</span></label>
+        <select id="qualificacao_exigida" name="qualificacao_exigida">
+          <option value="">— o que a classe já exige —</option>
+          {% for c in categorias %}<option value="{{ c.value }}">{{ c.value }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="valor_minimo">Valor mínimo <span class="aj">(opcional)</span></label>
+        <input id="valor_minimo" name="valor_minimo" placeholder="1.000,00">
+      </div>
+      <div>
+        <label for="vigencia_ate">Vigente até <span class="aj">(opcional)</span></label>
+        <input id="vigencia_ate" name="vigencia_ate" type="date">
+      </div>
+    </div>
+    <div class="acoes">
+      <button type="submit">Registrar oferta</button>
+      <span class="espaco"></span>
+      <span class="dica">pública ou privada não tem valor-padrão: oferta privada
+        sempre para para conferência de vínculo</span>
+    </div>
+  </form>
+</details>
+
+{% endblock %}

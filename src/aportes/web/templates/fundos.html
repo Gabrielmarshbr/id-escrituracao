@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% set aba = 'fundos' %}
+{% block titulo %}Fundos{% endblock %}
+{% block cabecalho %}Fundos e classes{% endblock %}
+{% block contexto %}
+  {{ classes | length }} de {{ total }} classe{{ 's' if total != 1 }} ·
+  {{ usuario }}
+{% endblock %}
+
+{% block conteudo %}
+
+{% if erro %}
+<div class="aviso parada">
+  <p class="rotulo">Não deu para registrar</p>
+  <p>{{ erro }}</p>
+</div>
+{% endif %}
+
+<form class="busca" method="get">
+  <input name="q" value="{{ busca }}" autofocus
+         placeholder="buscar por fundo, classe ou CNPJ">
+  <button type="submit">Buscar</button>
+  {% if busca %}<a class="botao fantasma" href="{{ url_for('fundos') }}">Limpar</a>{% endif %}
+</form>
+
+{% if classes %}
+<table class="lista">
+  <thead>
+    <tr>
+      <th>Fundo</th><th>Classe</th><th>Condomínio</th><th>Exige</th>
+      <th>Regra vem de</th><th>Documentos</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for classe in classes %}
+    <tr>
+      <td>
+        <strong>{{ classe.fundo_nome }}</strong><br>
+        <span class="aj">{{ classe.fundo_cnpj | documento }}</span>
+      </td>
+      <td>{{ classe.nome }}<br><span class="aj">{{ classe.id }}</span></td>
+      <td><span class="marca {{ classe.condominio.value }}">{{ classe.condominio.value }}</span></td>
+      <td>{{ classe.qualificacao_exigida.value }}</td>
+      <td class="aj">{{ classe.procedencia }}</td>
+      <td class="anexo">
+        {% for nome in documentos.get(classe.fundo_cnpj, []) %}
+          <a href="{{ url_for('baixar', tipo='fundos', chave=classe.fundo_cnpj, nome=nome) }}">{{ nome }}</a>
+        {% else %}
+          <span class="aj">nenhum</span><br>
+        {% endfor %}
+        <form class="anexar" method="post" enctype="multipart/form-data"
+              action="{{ url_for('anexar_ao_fundo', cnpj=classe.fundo_cnpj) }}">
+          <label class="enviar">anexar regulamento
+            <input type="file" name="arquivo" accept=".pdf,.docx,.doc"
+                   onchange="this.form.submit()">
+          </label>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% elif busca %}
+<p class="vazio">Nenhuma classe encontrada para “{{ busca }}”.</p>
+{% else %}
+<p class="vazio">Nenhuma classe cadastrada ainda. Registre a primeira abaixo —
+   os dados saem do regulamento do fundo.</p>
+{% endif %}
+
+<details class="novo" {% if not classes and not busca %}open{% endif %}>
+  <summary>+ Registrar uma classe nova</summary>
+  <form method="post" style="margin-top:.9rem">
+    <div class="grade">
+      <div class="largo">
+        <label for="fundo_nome">Nome do fundo</label>
+        <input id="fundo_nome" name="fundo_nome" required
+               placeholder="Fundo Exemplo FIDC">
+      </div>
+      <div>
+        <label for="fundo_cnpj">CNPJ do fundo</label>
+        <input id="fundo_cnpj" name="fundo_cnpj" required
+               placeholder="00.000.000/0001-00">
+      </div>
+      <div>
+        <label for="nome">Nome da classe</label>
+        <input id="nome" name="nome" required placeholder="Classe A Sênior">
+      </div>
+      <div>
+        <label for="id">Identificador <span class="aj">(usado nas boletas)</span></label>
+        <input id="id" name="id" required placeholder="EXEMPLO/A">
+      </div>
+      <div>
+        <label for="condominio">Condomínio</label>
+        <select id="condominio" name="condominio" required>
+          <option value="">— escolha —</option>
+          {% for c in condominios %}<option value="{{ c.value }}">{{ c.value }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="qualificacao_exigida">Qualificação exigida</label>
+        <select id="qualificacao_exigida" name="qualificacao_exigida" required>
+          <option value="">— escolha —</option>
+          {% for c in categorias %}<option value="{{ c.value }}">{{ c.value }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="fonte">De onde veio a regra</label>
+        <input id="fonte" name="fonte" value="regulamento">
+      </div>
+      <div>
+        <label for="lido_em">Lido em</label>
+        <input id="lido_em" name="lido_em" type="date" value="{{ hoje }}">
+      </div>
+    </div>
+    <div class="acoes">
+      <button type="submit">Registrar classe</button>
+      <span class="espaco"></span>
+      <span class="dica">condomínio e qualificação saem do regulamento —
+        fica gravado quem registrou e quando</span>
+    </div>
+  </form>
+</details>
+
+{% endblock %}

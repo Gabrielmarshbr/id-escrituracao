@@ -31,6 +31,11 @@ class Configuracao:
         return self.raiz / "modelos"
 
     @property
+    def pasta_documentos(self) -> Path:
+        """Regulamentos, suplementos e ATAs anexados. Fica em dados/."""
+        return self.pasta_dados / "documentos"
+
+    @property
     def pasta_saldos(self) -> Path:
         return self.pasta_dados / "saldos"
 

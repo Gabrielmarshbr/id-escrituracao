@@ -24,6 +24,7 @@ from aportes.extenso import formatar_reais
 from aportes.formatos import formatar_documento
 from aportes.qualificacao import Categoria
 from aportes.regras import avaliar
+from aportes.web.rotas_regras import registrar_rotas
 
 
 def criar_aplicacao(config: Configuracao, usuario: str | None = None,
@@ -37,8 +38,9 @@ def criar_aplicacao(config: Configuracao, usuario: str | None = None,
     def inicio():
         base = carregar_base(config)
         return render_template(
-            "boleta.html", base=base, config=config,
+            "boleta.html", base=base, config=config, aba="boletas",
             usuario=app.config["USUARIO"], hoje=date.today().isoformat(),
+            ofertas_por_classe=_ofertas_por_classe(base),
         )
 
     @app.post("/avaliar")
@@ -48,8 +50,9 @@ def criar_aplicacao(config: Configuracao, usuario: str | None = None,
             boleta = _boleta_do_formulario(request.form)
         except ValueError as erro:
             return render_template(
-                "boleta.html", base=base, config=config,
+                "boleta.html", base=base, config=config, aba="boletas",
                 usuario=app.config["USUARIO"], hoje=date.today().isoformat(),
+                ofertas_por_classe=_ofertas_por_classe(base),
                 erro=str(erro), form=request.form,
             ), 400
 
@@ -67,14 +70,34 @@ def criar_aplicacao(config: Configuracao, usuario: str | None = None,
 
         return render_template(
             "veredito.html", veredito=veredito, boleta=boleta, base=base,
+            aba="boletas",
             gerados=gerados, falha=falha, ja_vista=ja_vista,
             cotista=base.cotistas.get(boleta.documento_cotista),
         )
 
+    @app.get("/api/cotista/<documento>")
+    def consultar_cotista(documento):
+        """Diz o que a base sabe do cotista, para a tela preencher na hora.
+
+        Poupa descobrir so depois de mandar analisar que ele nem esta na base.
+        """
+        so_digitos = "".join(c for c in documento if c.isdigit())
+        cotista = carregar_base(config).cotistas.get(so_digitos)
+        if cotista is None:
+            return {"conhecido": False}
+        return {
+            "conhecido": True,
+            "nome": cotista.nome,
+            "tipo": cotista.tipo.value,
+            "categoria": cotista.categoria.value if cotista.categoria else None,
+            "procedencia": (str(cotista.categoria_procedencia)
+                            if cotista.categoria_procedencia else None),
+        }
+
     @app.get("/cotista")
     def formulario_cotista():
         return render_template(
-            "cotista.html", campos=CAMPOS_DE_CADASTRO,
+            "cotista.html", campos=CAMPOS_DE_CADASTRO, aba="boletas",
             categorias=list(Categoria), tipos=list(TipoPessoa),
             documento=request.args.get("documento", ""),
         )
@@ -85,7 +108,7 @@ def criar_aplicacao(config: Configuracao, usuario: str | None = None,
         documento = "".join(c for c in f.get("documento", "") if c.isdigit())
         if len(documento) not in (11, 14):
             return render_template(
-                "cotista.html", campos=CAMPOS_DE_CADASTRO,
+                "cotista.html", campos=CAMPOS_DE_CADASTRO, aba="boletas",
                 categorias=list(Categoria), tipos=list(TipoPessoa),
                 documento=f.get("documento", ""),
                 erro="CPF deve ter 11 digitos e CNPJ 14.",
@@ -108,7 +131,17 @@ def criar_aplicacao(config: Configuracao, usuario: str | None = None,
 
     app.jinja_env.filters["documento"] = formatar_documento
     app.jinja_env.filters["reais"] = formatar_reais
+    registrar_rotas(app, config)
     return app
+
+
+def _ofertas_por_classe(base) -> dict[str, list[dict]]:
+    """Para a tela filtrar a oferta assim que a classe e escolhida."""
+    por_classe: dict[str, list[dict]] = {}
+    for oferta in base.ofertas.values():
+        por_classe.setdefault(oferta.classe_id, []).append(
+            {"id": oferta.id, "publica": oferta.publica})
+    return por_classe
 
 
 def _boleta_do_formulario(form) -> Boleta:

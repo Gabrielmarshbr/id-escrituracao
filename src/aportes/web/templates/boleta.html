@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set aba = 'boletas' %}
 {% block titulo %}Nova boleta{% endblock %}
 {% block cabecalho %}Análise de boleta{% endblock %}
 {% block contexto %}
@@ -38,8 +39,9 @@
     <div>
       <label for="documento_cotista">CPF / CNPJ do cotista</label>
       <input id="documento_cotista" name="documento_cotista" required autofocus
-             placeholder="000.000.000-00"
+             placeholder="000.000.000-00" autocomplete="off"
              value="{{ form.documento_cotista if form }}">
+      <p class="dica" id="quem" style="margin:.3rem 0 0">&nbsp;</p>
     </div>
 
     <div class="largo">
@@ -107,5 +109,68 @@
   primeiro aporte e não vai adivinhar. Sua resposta fica registrada como
   resposta de pessoa.
 </p>
+
+<script>
+// Preenchimento assistido: nada aqui decide nada — só poupa digitação e
+// mostra cedo o que o servidor já sabe.
+(function () {
+  const ofertasPorClasse = {{ ofertas_por_classe | tojson }};
+  const classe = document.getElementById('classe_id');
+  const oferta = document.getElementById('oferta_id');
+  const cpf = document.getElementById('documento_cotista');
+  const quem = document.getElementById('quem');
+
+  // A oferta pertence a uma classe: escolhida a classe, só as dela aparecem.
+  // Havendo uma só, ela já vem marcada — um campo a menos, sempre.
+  function filtrarOfertas() {
+    const disponiveis = ofertasPorClasse[classe.value] || [];
+    oferta.innerHTML = '';
+    if (!classe.value) {
+      oferta.appendChild(new Option('— escolha a classe primeiro —', ''));
+      return;
+    }
+    if (disponiveis.length === 0) {
+      oferta.appendChild(new Option('— nenhuma oferta cadastrada —', ''));
+      return;
+    }
+    if (disponiveis.length > 1) oferta.appendChild(new Option('— escolha —', ''));
+    for (const o of disponiveis) {
+      oferta.appendChild(new Option(
+        o.id + (o.publica ? ' (pública)' : ' (PRIVADA)'), o.id));
+    }
+  }
+  classe.addEventListener('change', filtrarOfertas);
+  filtrarOfertas();
+
+  // CPF digitado: diz na hora se o cotista está na base, em vez de o
+  // descobrirmos só depois de mandar analisar.
+  let pendente;
+  cpf.addEventListener('input', function () {
+    clearTimeout(pendente);
+    const digitos = cpf.value.replace(/\D/g, '');
+    if (digitos.length !== 11 && digitos.length !== 14) {
+      quem.innerHTML = '&nbsp;';
+      return;
+    }
+    pendente = setTimeout(async function () {
+      try {
+        const r = await fetch('/api/cotista/' + digitos);
+        const d = await r.json();
+        if (!d.conhecido) {
+          quem.innerHTML = 'não está na base — ' +
+            '<a href="/cotista?documento=' + digitos + '">cadastrar agora</a>';
+        } else if (d.categoria) {
+          quem.textContent = d.nome + ' · ' + d.categoria +
+            (d.procedencia ? ' (' + d.procedencia + ')' : '');
+        } else {
+          quem.textContent = d.nome + ' · categoria CVM não registrada';
+        }
+      } catch (e) {
+        quem.innerHTML = '&nbsp;';
+      }
+    }, 250);
+  });
+})();
+</script>
 
 {% endblock %}

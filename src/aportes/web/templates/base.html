@@ -29,6 +29,47 @@
     gap:1rem; border-bottom:2px solid var(--azul);
     padding-bottom:.5rem; margin-bottom:1.15rem;
   }
+  .abas { display:flex; gap:.25rem; margin-bottom:-1px; }
+  .abas a {
+    font-size:.8rem; font-weight:600; text-decoration:none; color:var(--suave);
+    padding:.45rem .9rem; border:1px solid transparent; border-radius:6px 6px 0 0;
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+  .abas a:hover { color:var(--azul); background:var(--azul-claro); }
+  .abas a.atual {
+    color:var(--azul); background:var(--papel);
+    border-color:var(--linha); border-bottom-color:var(--papel);
+  }
+  .lista { width:100%; border-collapse:collapse; font-size:.85rem; }
+  .lista th {
+    text-align:left; font-size:.72rem; text-transform:uppercase;
+    letter-spacing:.05em; color:var(--suave); font-weight:700;
+    padding:.4rem .6rem; border-bottom:1px solid var(--linha);
+  }
+  .lista td { padding:.55rem .6rem; border-bottom:1px solid var(--linha); }
+  .lista tr:hover td { background:#fafbfc; }
+  .lista .anexo { font-size:.78rem; }
+  .lista .anexo a { display:inline-block; margin-right:.5rem; }
+  .marca {
+    display:inline-block; font-size:.7rem; font-weight:700; letter-spacing:.04em;
+    text-transform:uppercase; padding:.15rem .4rem; border-radius:4px;
+  }
+  .marca.fechado, .marca.privada { background:var(--alerta-fundo); color:var(--alerta); }
+  .marca.aberto, .marca.publica { background:var(--ok-fundo); color:var(--ok); }
+  .busca { display:flex; gap:.5rem; margin-bottom:1rem; }
+  .busca input { flex:1; }
+  details.novo { margin-top:1.25rem; }
+  details.novo > summary {
+    cursor:pointer; font-size:.8rem; font-weight:600; color:var(--azul);
+    padding:.45rem 0;
+  }
+  .vazio { color:var(--suave); font-size:.85rem; padding:1.25rem 0; }
+  form.anexar { display:inline; }
+  form.anexar input[type=file] { display:none; }
+  form.anexar label.enviar {
+    display:inline; font-size:.75rem; color:var(--azul); cursor:pointer;
+    font-weight:500; text-decoration:underline;
+  }
   .topo h1 {
     margin:0; font-size:1rem; color:var(--azul);
     text-transform:uppercase; letter-spacing:.05em;
@@ -107,6 +148,14 @@
 </head>
 <body>
 <main>
+  <nav class="abas">
+    <a href="{{ url_for('inicio') }}"
+       class="{{ 'atual' if aba == 'boletas' }}">Boletas</a>
+    <a href="{{ url_for('fundos') }}"
+       class="{{ 'atual' if aba == 'fundos' }}">Fundos</a>
+    <a href="{{ url_for('ofertas') }}"
+       class="{{ 'atual' if aba == 'ofertas' }}">Ofertas</a>
+  </nav>
   <div class="moldura">
     <div class="topo">
       <h1>{% block cabecalho %}Aportes{% endblock %}</h1>

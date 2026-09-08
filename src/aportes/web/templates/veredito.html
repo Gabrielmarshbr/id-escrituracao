@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block titulo %}Resultado{% endblock %}
 {% block cabecalho %}Resultado da análise{% endblock %}
-{% block subtitulo %}
-  {{ boleta.documento_cotista | documento }} — {{ boleta.classe_id }} —
+{% block contexto %}
+  {{ boleta.documento_cotista | documento }} · {{ boleta.classe_id }} ·
   R$ {{ boleta.valor | reais }}
 {% endblock %}
 
@@ -21,8 +21,8 @@
   <p>{{ veredito.motivo }}</p>
 </div>
 {% if gerados %}
-<div class="cartao">
-  <h2 style="margin-top:0">Documentos gerados</h2>
+<div class="moldura">
+  <h2>Documentos gerados</h2>
   <ul>{% for caminho in gerados %}<li><code>{{ caminho }}</code></li>{% endfor %}</ul>
   <p class="sub">Confira antes de subir no Portal ID. A aprovação continua sendo
      um ato seu, no portal.</p>
@@ -61,8 +61,8 @@
 {% endif %}
 
 {% if veredito.pendencias %}
-<div class="cartao">
-  <h2 style="margin-top:0">O que fazer</h2>
+<div class="moldura">
+  <h2>O que fazer</h2>
   <ul>{% for pendencia in veredito.pendencias %}<li>{{ pendencia }}</li>{% endfor %}</ul>
   {% if not cotista %}
   <p><a href="{{ url_for('formulario_cotista', documento=boleta.documento_cotista) }}">
@@ -71,8 +71,8 @@
 </div>
 {% endif %}
 
-<div class="cartao">
-  <h2 style="margin-top:0">O que foi analisado</h2>
+<div class="moldura">
+  <h2>O que foi analisado</h2>
   <table>
     <tr><td>Cotista</td><td>
       {{ boleta.documento_cotista | documento }}

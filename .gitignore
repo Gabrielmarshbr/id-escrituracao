@@ -17,3 +17,4 @@ config.local.json
 # Transcricao do brainstorming: cita maquina corporativa e fluxo interno.
 # Fica no disco, fora do versionamento.
 historico/
+docs/design/preview/

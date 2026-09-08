@@ -6,69 +6,117 @@
 <title>{% block titulo %}Aportes{% endblock %} — Escrituração</title>
 <style>
   :root {
-    --tinta: #1a1d23; --suave: #5b6472; --linha: #dde1e7;
-    --fundo: #f6f7f9; --papel: #ffffff;
-    --ok: #0f7b4f; --ok-fundo: #e8f5ee;
-    --atencao: #8a5a00; --atencao-fundo: #fdf3e0;
-    --parada: #a3282f; --parada-fundo: #fdecec;
+    --tinta:#14171c; --suave:#6b7280; --linha:#e4e7ec; --borda-campo:#cfd4dc;
+    --fundo:#f2f4f7; --papel:#fff; --azul:#1f4e79; --azul-claro:#eaf1f8;
+    --ok:#0f7b4f; --ok-fundo:#e8f5ee;
+    --alerta:#8a5a00; --alerta-fundo:#fdf3e0;
+    --parada:#a3282f; --parada-fundo:#fdecec;
   }
   * { box-sizing: border-box; }
   body {
-    margin: 0; padding: 2rem 1rem 4rem;
-    font: 16px/1.55 "Segoe UI", system-ui, sans-serif;
-    color: var(--tinta); background: var(--fundo);
+    margin:0; padding:1.75rem 1.25rem 3rem; background:var(--fundo);
+    color:var(--tinta); font:16px/1.5 "Segoe UI", system-ui, sans-serif;
   }
-  main { max-width: 720px; margin: 0 auto; }
-  header { margin-bottom: 1.75rem; }
-  h1 { font-size: 1.5rem; margin: 0 0 .25rem; }
-  h2 { font-size: 1.1rem; margin: 2rem 0 .75rem; }
-  .sub { color: var(--suave); font-size: .9rem; margin: 0; }
-  .cartao {
-    background: var(--papel); border: 1px solid var(--linha);
-    border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem;
+  main { max-width:960px; margin:0 auto; }
+
+  .moldura {
+    background:var(--papel); border:1px solid var(--linha); border-radius:8px;
+    box-shadow:0 1px 3px rgba(20,23,28,.06); padding:1.5rem; margin-bottom:1rem;
   }
-  label { display: block; font-weight: 600; font-size: .875rem; margin-bottom: .35rem; }
-  .ajuda { font-weight: 400; color: var(--suave); }
+
+  .topo {
+    display:flex; justify-content:space-between; align-items:baseline;
+    gap:1rem; border-bottom:2px solid var(--azul);
+    padding-bottom:.5rem; margin-bottom:1.15rem;
+  }
+  .topo h1 {
+    margin:0; font-size:1rem; color:var(--azul);
+    text-transform:uppercase; letter-spacing:.05em;
+  }
+  .topo small { color:var(--suave); font-size:.75rem; text-align:right; }
+
+  label, .rot {
+    display:block; font-weight:600; font-size:.8rem; margin-bottom:.3rem;
+  }
+  .aj { color:var(--suave); font-weight:400; }
   input, select {
-    width: 100%; padding: .55rem .7rem; font: inherit;
-    border: 1px solid var(--linha); border-radius: 6px; background: var(--papel);
+    width:100%; padding:.5rem .65rem; font:inherit; font-size:.9rem;
+    border:1px solid var(--borda-campo); border-radius:6px;
+    background:var(--papel); color:var(--tinta);
   }
-  input:focus, select:focus { outline: 2px solid #3b6ea5; outline-offset: 1px; }
-  .campo { margin-bottom: 1.1rem; }
-  .dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  button {
-    font: inherit; font-weight: 600; padding: .7rem 1.4rem;
-    background: var(--tinta); color: #fff; border: 0; border-radius: 6px;
-    cursor: pointer;
+  input:focus, select:focus { outline:2px solid var(--azul); outline-offset:1px; }
+  input[type=file] { padding:.35rem; font-size:.82rem; }
+
+  .grade { display:grid; grid-template-columns:1fr 1fr 1fr; gap:.8rem 1rem; }
+  .largo { grid-column:span 2; }
+  .cheio { grid-column:1 / -1; }
+  @media (max-width:720px) {
+    .grade { grid-template-columns:1fr; }
+    .largo, .cheio { grid-column:auto; }
   }
-  button:hover { background: #000; }
-  a { color: #2a5d99; }
-  .aviso { border-left: 4px solid; padding: .9rem 1.1rem; border-radius: 6px; margin-bottom: 1.25rem; }
-  .aviso p { margin: .35rem 0; }
-  .aviso :first-child { margin-top: 0; }
-  .aviso :last-child { margin-bottom: 0; }
-  .ok { border-color: var(--ok); background: var(--ok-fundo); }
-  .atencao { border-color: var(--atencao); background: var(--atencao-fundo); }
-  .parada { border-color: var(--parada); background: var(--parada-fundo); }
-  .rotulo { font-weight: 700; text-transform: uppercase; letter-spacing: .04em; font-size: .75rem; }
-  ul { margin: .5rem 0; padding-left: 1.2rem; }
-  code { background: #eef0f3; padding: .1rem .35rem; border-radius: 4px; font-size: .875em; }
-  .rodape { color: var(--suave); font-size: .8rem; margin-top: 2.5rem; }
-  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  td { padding: .4rem 0; border-bottom: 1px solid var(--linha); vertical-align: top; }
-  td:first-child { color: var(--suave); width: 40%; }
+
+  .acoes {
+    margin-top:1.1rem; padding-top:.9rem; border-top:1px solid var(--linha);
+    display:flex; gap:.5rem; align-items:center; flex-wrap:wrap;
+  }
+  .acoes .espaco { flex:1; }
+  .dica { font-size:.75rem; color:var(--suave); }
+
+  button, .botao {
+    font:inherit; font-weight:600; font-size:.9rem; padding:.55rem 1.15rem;
+    border:0; border-radius:6px; background:var(--azul); color:#fff;
+    cursor:pointer; text-decoration:none; display:inline-block;
+  }
+  button:hover, .botao:hover { background:#173c5c; }
+  .fantasma {
+    background:transparent; color:var(--azul);
+    border:1px solid var(--borda-campo); font-weight:500;
+  }
+  .fantasma:hover { background:var(--azul-claro); }
+
+  kbd {
+    font:600 .7rem/1 ui-monospace, monospace; background:#f2f4f7;
+    border:1px solid var(--borda-campo); border-bottom-width:2px;
+    border-radius:4px; padding:.2rem .35rem; color:var(--suave);
+  }
+
+  .aviso { border-left:4px solid; padding:.85rem 1.05rem; border-radius:6px; margin-bottom:1rem; }
+  .aviso p { margin:.3rem 0; font-size:.9rem; }
+  .aviso :first-child { margin-top:0; }
+  .aviso :last-child { margin-bottom:0; }
+  .ok { border-color:var(--ok); background:var(--ok-fundo); }
+  .atencao { border-color:var(--alerta); background:var(--alerta-fundo); }
+  .parada { border-color:var(--parada); background:var(--parada-fundo); }
+  .rotulo {
+    font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+    font-size:.72rem;
+  }
+
+  h2 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em;
+       color:var(--suave); margin:0 0 .8rem; }
+  ul { margin:.4rem 0; padding-left:1.15rem; font-size:.9rem; }
+  a { color:var(--azul); }
+  code { background:#f2f4f7; padding:.1rem .35rem; border-radius:4px; font-size:.85em; }
+
+  table { width:100%; border-collapse:collapse; font-size:.875rem; }
+  td { padding:.4rem 0; border-bottom:1px solid var(--linha); vertical-align:top; }
+  td:first-child { color:var(--suave); width:38%; }
+
+  .rodape { color:var(--suave); font-size:.75rem; margin-top:1.5rem; }
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <h1>{% block cabecalho %}Aportes{% endblock %}</h1>
-    <p class="sub">{% block subtitulo %}{% endblock %}</p>
-  </header>
-  {% block conteudo %}{% endblock %}
+  <div class="moldura">
+    <div class="topo">
+      <h1>{% block cabecalho %}Aportes{% endblock %}</h1>
+      <small>{% block contexto %}{% endblock %}</small>
+    </div>
+    {% block conteudo %}{% endblock %}
+  </div>
   <p class="rodape">
-    Escrituração — assistente de aportes. Os documentos gerados ficam na pasta
-    de saída; a aprovação no Portal ID continua manual.
+    Escrituração — assistente de aportes. Os documentos ficam na pasta de saída;
+    a aprovação no Portal ID continua manual.
   </p>
 </main>
 </body>

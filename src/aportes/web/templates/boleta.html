@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block titulo %}Nova boleta{% endblock %}
-{% block cabecalho %}Analisar uma boleta{% endblock %}
-{% block subtitulo %}
-  Operando como <strong>{{ usuario }}</strong>.
-  {% if config.compartilhada %}Base compartilhada da equipe.
-  {% else %}Base local desta máquina.{% endif %}
+{% block cabecalho %}Análise de boleta{% endblock %}
+{% block contexto %}
+  {{ usuario }} ·
+  {% if config.compartilhada %}base compartilhada{% else %}base local{% endif %}
 {% endblock %}
 
 {% block conteudo %}
@@ -19,93 +18,94 @@
 {% if request.args.get('cadastrado') %}
 <div class="aviso ok">
   <p class="rotulo">Cotista salvo</p>
-  <p>{{ request.args.get('cadastrado') | documento }} está na base. Ele já pode
-     ser usado numa boleta.</p>
+  <p>{{ request.args.get('cadastrado') | documento }} está na base e já pode ser
+     usado numa boleta.</p>
 </div>
 {% endif %}
 
 {% if not base.classes %}
 <div class="aviso atencao">
-  <p class="rotulo">Nenhuma classe cadastrada ainda</p>
-  <p>As regras de fundo e classe ficam em <code>regras/fundos.yaml</code>, e
-     quem as edita é o responsável pela área — esta tela não escreve regra.
-     Peça o cadastro da classe antes de lançar a boleta.</p>
+  <p class="rotulo">Nenhuma classe cadastrada</p>
+  <p>As regras de fundo e classe ficam em <code>regras/fundos.yaml</code>, e quem
+     as edita é o responsável pela área — esta tela não escreve regra. Peça o
+     cadastro da classe antes de lançar a boleta.</p>
 </div>
 {% endif %}
 
 <form method="post" action="{{ url_for('processar') }}">
-  <div class="cartao">
+  <div class="grade">
 
-    <div class="campo">
-      <label for="documento_cotista">CPF ou CNPJ do cotista</label>
-      <input id="documento_cotista" name="documento_cotista" required
+    <div>
+      <label for="documento_cotista">CPF / CNPJ do cotista</label>
+      <input id="documento_cotista" name="documento_cotista" required autofocus
              placeholder="000.000.000-00"
              value="{{ form.documento_cotista if form }}">
-      <p class="sub">Se ele ainda não estiver na base, você vai poder cadastrar
-         na tela seguinte.</p>
     </div>
 
-    <div class="campo">
+    <div class="largo">
       <label for="classe_id">Fundo e classe</label>
       <select id="classe_id" name="classe_id" required>
         <option value="">— escolha —</option>
         {% for id, classe in base.classes | dictsort %}
           <option value="{{ id }}">
-            {{ classe.fundo_nome }} — {{ classe.nome }}
-            ({{ classe.condominio.value }})
+            {{ classe.fundo_nome }} — {{ classe.nome }} ({{ classe.condominio.value }})
           </option>
         {% endfor %}
       </select>
     </div>
 
-    <div class="campo">
+    <div>
       <label for="oferta_id">Oferta</label>
       <select id="oferta_id" name="oferta_id" required>
         <option value="">— escolha —</option>
         {% for id, oferta in base.ofertas | dictsort %}
           <option value="{{ id }}">
-            {{ id }} — {{ oferta.classe_id }}
-            ({{ 'pública' if oferta.publica else 'PRIVADA' }})
+            {{ id }} ({{ 'pública' if oferta.publica else 'PRIVADA' }})
           </option>
         {% endfor %}
       </select>
     </div>
 
-    <div class="dupla">
-      <div class="campo">
-        <label for="valor">Valor do aporte <span class="ajuda">(R$)</span></label>
-        <input id="valor" name="valor" required placeholder="10.000,00"
-               value="{{ form.valor if form }}">
-      </div>
-      <div class="campo">
-        <label for="data">Data da boleta</label>
-        <input id="data" name="data" type="date" value="{{ hoje }}" required>
-      </div>
+    <div>
+      <label for="valor">Valor do aporte <span class="aj">(R$)</span></label>
+      <input id="valor" name="valor" required placeholder="10.000,00"
+             value="{{ form.valor if form }}">
     </div>
 
-    <div class="campo">
-      <label for="id_boleta">Número da boleta <span class="ajuda">(opcional)</span></label>
-      <input id="id_boleta" name="id_boleta" placeholder="como aparece no Portal ID"
+    <div>
+      <label for="data">Data da boleta</label>
+      <input id="data" name="data" type="date" value="{{ hoje }}" required>
+    </div>
+
+    <div>
+      <label for="id_boleta">Nº da boleta <span class="aj">(opcional)</span></label>
+      <input id="id_boleta" name="id_boleta" placeholder="como aparece no portal"
              value="{{ form.id_boleta if form }}">
-      <p class="sub">Com ele, a mesma boleta nunca é processada duas vezes.</p>
     </div>
 
-    <div class="campo">
-      <label for="primeiro_aporte">É o primeiro aporte deste cotista neste fundo?</label>
+    <div class="largo">
+      <label for="primeiro_aporte">Primeiro aporte deste cotista neste fundo?</label>
       <select id="primeiro_aporte" name="primeiro_aporte">
         <option value="">Deixe o sistema decidir pelo Saldo de Aplicações</option>
-        <option value="sim">Sim — primeiro aporte (sai Termo de Adesão)</option>
-        <option value="nao">Não — ele já está no fundo</option>
+        <option value="sim">Sim — sai Termo de Adesão</option>
+        <option value="nao">Não — já está no fundo</option>
       </select>
-      <p class="sub">Enquanto o Saldo de Aplicações do Britech não estiver
-         carregado, o sistema não sabe responder sozinho e não vai adivinhar.
-         Sua resposta fica registrada como resposta de pessoa.</p>
     </div>
 
+  </div>
+
+  <div class="acoes">
     <button type="submit">Analisar</button>
+    <a class="botao fantasma" href="{{ url_for('formulario_cotista') }}">Cadastrar cotista</a>
+    <span class="espaco"></span>
+    <span class="dica"><kbd>Tab</kbd> anda nos campos · <kbd>Enter</kbd> analisa</span>
   </div>
 </form>
 
-<p><a href="{{ url_for('formulario_cotista') }}">Cadastrar um cotista novo</a></p>
+<p class="dica" style="margin-top:1rem">
+  Sem o Saldo de Aplicações do Britech carregado, o sistema não sabe se é o
+  primeiro aporte e não vai adivinhar. Sua resposta fica registrada como
+  resposta de pessoa.
+</p>
 
 {% endblock %}
